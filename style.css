@@ -46,7 +46,9 @@ body {
     color: var(--text-main);
     padding-bottom: 100px;
     padding: 0;
+    padding-top: env(safe-area-inset-top); /* deja espacio arriba para la status bar */
 }
+
 #dateSelector input {
     -webkit-appearance: none;
     width: auto;
@@ -68,9 +70,10 @@ body {
 }
 
 main {
-    padding: 0 26px;
-    margin-top: -12px;
+    padding: env(safe-area-inset-top) 26px 0 26px;
+    margin-top: 0;
 }
+
 
 /* --- Action Button --- */
 
@@ -619,35 +622,11 @@ main {
     justify-content: space-between;
 }
 
-/* TabBar bottom iOS */
-
-#tabBar {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: #fff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-}
-
-.tabItem {
-    text-align: center;
-    font-size: 24px;
-    color: #8E8E93;
-}
-
-.tabItem.active {
-    color: #007AFF;
-}
-
 header {
     position: sticky;
     top: 8px;
     z-index: 30;
+    top: env(safe-area-inset-top);
 }
 
 .topbar {
@@ -655,6 +634,7 @@ header {
     display: flex;
     flex-direction: column;
     padding: 24px 28px 40px 28px;
+    padding-top: calc(24px + env(safe-area-inset-top)); /* suma tu padding original + safe area */
 }
 
 .cont {

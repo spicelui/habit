@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitflow-v1.1'; 
+const CACHE_NAME = 'habitflow-v1.2'; 
 const ASSETS = [
   './',
   './index.html',
@@ -50,3 +50,4 @@ self.addEventListener('fetch', e => {
     })
   );
 });
+

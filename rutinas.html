@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hábitos - Rutinas</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFFFFF">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="cont">
+       <div class="bigt">Hábitos</div>
+    </div>
+    <div class="segmented-control-container">
+        <div class="segmented-control">
+            <input type="radio" name="view-switch" id="view-habits">
+            <label for="view-habits" onclick="window.location.href='index.html'">Hábitos</label>
+
+            <input type="radio" name="view-switch" id="view-routines" checked>
+            <label for="view-routines" onclick="window.location.href='rutinas.html'">Rutinas</label>
+            
+            <div class="selection-slider" style="transform: translateX(100%);"></div>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main id="habitsContainer">
+    </main>
+
+<div id="customPrompt" class="custom-alert-overlay">
+    <div class="custom-alert">
+        <div class="alert-title">Nueva Rutina</div>
+        <div class="alert-message">Ingresa el nombre para agrupar tus hábitos.</div>
+        <input type="text" id="routineInput" class="alert-input" placeholder="Ej: Mañana, Gym..." autocomplete="off">
+        <div class="alert-buttons">
+            <button onclick="closeCustomPrompt(event)" class="alert-btn cancel">Cancelar</button>
+            <button onclick="confirmCustomPrompt()" class="alert-btn confirm">Crear</button>
+        </div>
+    </div>
+</div>
+
+<div id="routineViewSheet" class="sheetContent">
+    <div class="headerA">
+        <div class="spaceline"><div class="line"></div></div>
+        <div class="centro">
+            <button class="btn-cancel" onclick="closeSheet()">􀆄</button>
+            <div class="actions">
+                <div class="pair">
+                    <button class="single" onclick="deleteRoutine()">􀈑</button>
+                    <button class="single" onclick="editRoutineName()">􀈊</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="screen" style="text-align: center; padding-top: 20px;">
+        <div class="streakBadge">
+            <div class="fire">􀙭</div>
+            <div id="rtStreakValue">0</div>
+            <div id="rtStreakText">Días de racha</div>
+        </div>
+        <div class="habito" id="rtViewTitle" style="margin: 15px 0;">Rutina</div>
+        <hr style="opacity: 0.1; margin: 20px 16px;">
+        <div class="subt" style="text-align: left; padding-left: 16px;">Hábitos incluidos</div>
+        <div id="rtHabitsList"></div>
+    </div>
+</div>
+<script src="icons.js"></script>
+<script src="habits.js"></script>
+<script src="routines.js"></script>
+<script>
+    // Pequeño hack por si tu app.js necesita saber manualmente que cargue rutinas al iniciar
+    window.onload = () => { if(typeof switchView === 'function') switchView('routines'); };
+</script>
+</body>
+</html>

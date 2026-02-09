@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitflow-v1.2'; 
+const CACHE_NAME = 'habitflow-v1.2'; // cambia la versión cada vez que actualices archivos
 const ASSETS = [
   './',
   './index.html',
@@ -50,4 +50,3 @@ self.addEventListener('fetch', e => {
     })
   );
 });
-

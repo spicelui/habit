@@ -52,21 +52,20 @@ body {
 #dateSelector input {
     -webkit-appearance: none;
     width: auto;
-    border: none;
-    background: #00000008;
-    padding: 10px 16px;
-    border-radius: 19px;
+    border: 0.9px solid #ffffff8a;
+    background: #ececec36;
+    backdrop-filter: blur(7px) saturate(1.5) brightness(1.14);
+    box-shadow: inset 0 0 8px 1px #0000002c, 0 0 18px 0 #00000011;
+    padding: 9px 15px;
+    border-radius: 20px;
     font-weight: 430;
-    font-size: 16px;
-    color: #0000005e; 
-    
-    backdrop-filter: blur(14px);
+    font-size: 17px;
+    color: #00000077; 
     transition: 400ms;
 }
 #dateSelector input:focus{
-    background: #0000000b;
-    scale: 90%;
-    color: #0000006f;
+    color: #0000007b; 
+    scale: 104%;
 }
 
 main {
@@ -81,8 +80,9 @@ main {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: var(--primary);
-    color: white;
+    background: #00000060;
+    backdrop-filter: blur(18px) contrast(1.3) brightness(0.4) saturate(10);
+    color: rgb(255, 255, 255);
     border: none;
     font-family: 'sf';
     font-size: 24px;
@@ -123,9 +123,25 @@ main {
 .sheetContent.closing {
     transition: transform 400ms cubic-bezier(.42,.3,.26,.99); /* close */
 }
+
 .sheetContent.active {
     transform: translateY(0);
-    box-shadow: 0px 14px 70px 0px #00000038;
+}
+
+/* Opcional: Oscurecer un poco la sheet de abajo cuando hay otra encima */
+#routineViewSheet.active {
+    filter: brightness(1);
+    transition: filter 0.3s;
+}
+
+/* Si activeSheet es diferente a routineViewSheet pero routineViewSheet existe en el DOM... */
+body:has(#viewSheet.active) #routineViewSheet,
+body:has(#streakSheet.active) #routineViewSheet,
+body:has(#iconPickerSheet.active) #routineViewSheet {
+    filter: brightness(0.9);
+    transition: 200ms;
+    transform: scale(0.95);
+    box-shadow: none;
 }
 #view{
     margin-bottom: 30%;
@@ -170,7 +186,7 @@ main {
 }
 .headerIcons{
    font-size: 17.5px;
-   padding: 0 0 28px 0;
+   padding: 0 0 8px 0;
    margin-top: -1px;
    font-weight: 540;
    text-align: center;
@@ -309,14 +325,6 @@ main {
     font-size: 32px;
 }
 
-.iconGrid {
-   font-family: 'sf';
-   display: grid;
-   grid-template-columns: repeat(6, 1fr);
-   gap: 15px;
-   margin: -14px 28px 100px 28px;
-}
-
 .iconItem {
     font-family: 'sf';
     aspect-ratio: 1;
@@ -326,13 +334,19 @@ main {
     justify-content: center;
     font-size: 23px;
     font-weight: 599;
-    border-radius: 12px;
+    border-radius: 10px;
     background: transparent;
-    color: #969499;
+    width: 48px;
+    height: 48px;
+    color: #94909b;
+    transition: scale 200ms;
+    scale: 100%;
 }
 .iconItem.selected {
-    background: #3030300f;
+    background: #3030300a;
     border-radius: 12px;
+    filter: brightness(0.95);
+    scale: 108%;
 }
 
 .manualQtyInput {
@@ -451,12 +465,13 @@ main {
 .calGrid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
     text-align: center;
     align-items: center;
     justify-items: center;
-    box-sizing: border-box;
     width: 100%;
+    gap: 4px;
+    width: 100%; 
+    box-sizing: border-box;
 }
 .ring-fg {
     fill: none;
@@ -470,7 +485,6 @@ main {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    max-width: 48px;   /* límite superior */
     height: 44px;
     display: flex;
     align-items: center;
@@ -544,7 +558,6 @@ main {
     display: flex;
     align-items: center;
     gap: 14px;
-    margin-bottom: 12px;
     min-height: 0;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -553,7 +566,13 @@ main {
     transition: 300ms;
     overflow: hidden;
 }
-
+#habitsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 200px;
+    margin-top: -20px;
+}
 .habitCard.completed .habitName {
     opacity: 0.3;
     text-decoration: line-through;
@@ -634,7 +653,7 @@ header {
     display: flex;
     flex-direction: column;
     padding: 24px 28px 40px 28px;
-    padding-top: calc(24px + env(safe-area-inset-top)); /* suma tu padding original + safe area */
+    padding-top: calc(24px + env(safe-area-inset-top)); 
 }
 
 .cont {
@@ -660,7 +679,7 @@ header {
     );
     -webkit-mask-image: linear-gradient(
         to bottom,
-        black 80%,
+        black 50%,
         transparent 100%
     );
     z-index: -1;
@@ -723,14 +742,13 @@ header {
    padding: 0px 20px;
    border-radius: 26px;
 }
-
 .colorPresets {
-  display: grid;
-  grid-template-columns: repeat(7, 40px); /* columnas de 40px fijas */
-  gap: 12px; /* espacio entre círculos */
-  justify-content: start; /* alinea a la izquierda */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+    gap: 12px;
+    padding: 16px 0;
+    width: 100%;
 }
-
 .colorPresets::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
@@ -970,3 +988,236 @@ hr{
     font-weight: 600;
     margin: 12px 0 0px 12px;
 }
+.searchBar {
+    padding: 10px 20px;
+}
+#iconSearch {
+    width: 100%;
+    padding: 12px 22px;
+    border-radius: 24px;
+    border: 0.7px solid #ffffff8a;
+    background: #ececec36;
+    backdrop-filter: blur(6px) saturate(1.5) brightness(1.1);
+    box-shadow: inset 0 0 8px 0 #00000025, 0 0 21px 0 #0000000e;
+    font-size: 17.4px;
+    font-family: 'sf';
+    margin-top: 4px;
+    transition: all 400ms ease; 
+    outline: none; 
+}
+
+#iconSearch:focus {
+    animation: bounce 700ms ease-out;
+    backdrop-filter: blur(6px) saturate(1.5) brightness(1.17);
+    background-color: #ffffff83;
+    scale: 101%; 
+    padding: 12px 22px; 
+    box-shadow: inset 0 0 10px 0 #00000031, 0 0 21px 0 #00000018;
+}
+
+@keyframes bounce {
+    0% {
+        scale: 1;
+        caret-color: transparent;
+    }
+    40% {
+        scale: 108% 103%;
+        caret-color: transparent;
+    }
+    70% {
+        scale: 97% 102%;
+        caret-color: transparent;
+    }
+    100% {
+        scale: 103%;
+        caret-color: transparent;
+    }
+}
+.iconGridSub {
+    width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    /* minmax(48px, 1fr) asegura que el icono no mida menos de 48px.
+       auto-fill creará tantas columnas como quepan. 
+    */
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 12px;
+    justify-items: center; /* Centra los iconos en su celda */
+}
+#iconGrid{
+    margin: 0 24px 100px 24px;
+    display: flex;
+    flex-direction: column;
+}
+#iconPickerSheet{
+    height: 98%;
+}
+.iconCategory {
+  margin-bottom: 20px;
+}
+
+.iconCategory .categoryTitle {
+  margin-bottom: 10px;
+  font-weight: 500;
+  font-size: 17px;
+}
+.segmented-control-container {
+    padding: 10px 16px;
+    background: transparent;
+}
+
+.segmented-control {
+    position: relative;
+    display: flex;
+    background: #7676801e;
+    backdrop-filter: blur(12px);
+    border-radius: 26px;
+    padding: 8px;
+    user-select: none;
+}
+
+.segmented-control input {
+    display: none;
+}
+
+.segmented-control label {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+    z-index: 1;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.selection-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    height: calc(100% - 6px);
+    background: #ffffff;
+    border-radius: 26px;
+    transition: transform 450ms cubic-bezier(.38,.23,.26,.98);
+}
+
+/* Movimiento del slider */
+#view-routines:checked ~ .selection-slider {
+    transform: translateX(100%);
+}
+
+#view-habits:checked ~ label[for="view-habits"],
+#view-routines:checked ~ label[for="view-routines"] {
+    font-weight: 600;
+}
+.routine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 18px 8px 18px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #000;
+}
+.rt-count {
+    font-size: 14px;
+    color: #8E8E93;
+    font-weight: 400;
+}
+.habitTime {
+    font-size: 12px;
+    color: #8E8E93;
+    margin-top: 2px;
+    font-weight: 500;
+}
+.custom-alert-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.079);
+    display: none; /* Oculto por defecto */
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.custom-alert {
+    width: 270px;
+    background: rgba(255, 255, 255, 0.411);
+    backdrop-filter: blur(15px);
+    border-radius: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.587);
+    text-align: center;
+    overflow: hidden;
+    animation: alertPop 0.2s ease-out;
+}
+
+@keyframes alertPop {
+    from { transform: scale(1.2); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.alert-title { font-weight: 600; padding: 16px 16px 4px; font-size: 17px; }
+.alert-message { font-size: 13px; padding: 0 16px 12px; color: #000; }
+
+.alert-input {
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+    padding: 6px 8px;
+    border: 0.5px solid #8E8E93;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    outline: none;
+}
+
+.alert-buttons {
+    display: flex;
+    border-top: 0.5px solid #C6C6C8;
+}
+
+.alert-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.alert-btn.cancel { color: #007AFF; border-right: 0.5px solid #C6C6C8; }
+.alert-btn.confirm { color: #007AFF; font-weight: 600; }
+
+.alert-btn:active { background: rgba(0,0,0,0.05); }
+.routineCard {
+    background: #fafafa;
+    padding: 18px 26px;
+    height: 120px;
+    border-radius: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: top;
+    transition: transform 0.2s;
+}
+
+.routineCard:active { transform: scale(0.97); }
+
+.rtTitle { font-size: 18px; font-weight: 500; color: #1c1c1e; }
+.rtStats { font-size: 15.5px; color: #8e8e93; margin-top: 4px; }
+
+.rtProgressRing { position: relative; width: 50px; height: 50px; }
+.circular-chart { width: 50px; height: 50px; }
+.circle-bg { fill: none; stroke: #eee; stroke-width: 3.8; }
+.circle { fill: none; stroke: #007AFF; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
+
+.rtIcon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px; color: #007AFF;
+    font-weight: 600;
+}
+
+.routineCard.perfect .circle { stroke: #34C759; }
+.routineCard.perfect .rtIcon { color: #34C759; }

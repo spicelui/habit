@@ -334,18 +334,208 @@ document.getElementById('vQtyManual').oninput = (e) => {
     renderHabits(h.id);
 };
 // --- UTILIDADES ---
+
 function getStreak(h) {
-    let streak = 0; let curr = new Date(); curr.setHours(0,0,0,0);
-    const todayStr = curr.toISOString().split('T')[0];
+    let streak = 0;
+    let curr = new Date(); // Hoy
+    curr.setHours(0, 0, 0, 0);
+
     while (true) {
-        let key = curr.toISOString().split('T')[0];
-        if (h.history[key] >= h.goal) streak++;
-        else if (key === todayStr) { /* racha sigue viva hoy */ }
-        else break;
+        // Formato YYYY-MM-DD local
+        let key = curr.getFullYear() + '-' + 
+                  String(curr.getMonth() + 1).padStart(2, '0') + '-' + 
+                  String(curr.getDate()).padStart(2, '0');
+        
+        if (h.history && h.history[key] >= h.goal) {
+            streak++;
+        } else {
+            // Si es hoy y no está completo, la racha sigue viva por ayer
+            let todayStr = new Date().getFullYear() + '-' + 
+                           String(new Date().getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(new Date().getDate()).padStart(2, '0');
+            if (key === todayStr) {
+                // No sumamos pero seguimos buscando
+            } else {
+                break; 
+            }
+        }
         curr.setDate(curr.getDate() - 1);
     }
     return streak;
 }
+
+function openStreak() {
+    const h = habits[currentHabitIdx];
+    
+    // 1. Calcular racha con la función unificada
+    const racha = getStreak(h);
+    
+    // 2. Actualizar el UI de la racha (el badge que creamos)
+    document.getElementById('streakValue').textContent = racha;
+    document.getElementById('streakText').textContent = racha === 1 ? 'Día de racha' : 'Días de racha';
+    
+const streakValue = document.getElementById("streakValue");
+const fire = document.querySelector(".fire");
+
+// Aplicar grayscale si racha = 0
+if (racha === 0) {
+    fire.style.filter = "grayscale(100%)";
+    fire.style.opacity = "0.5";
+} else {
+    fire.style.filter = "grayscale(0%)";
+    fire.style.opacity = "1";
+}
+
+    // 3. El resto de tu lógica de calendario y gráficas
+    weekOffset = getWeekOffset(selectedDate); 
+    calDate = new Date(selectedDate);
+    renderCalendar();
+    updateChart();
+    openSheet('streakSheet');
+}
+function renderCalendar() {
+    const h = habits[currentHabitIdx];
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    const month = calDate.getMonth(), year = calDate.getFullYear();
+    document.getElementById('calTitle').textContent = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(calDate);
+    // 1. Cambiamos el orden de las etiquetas
+    const diasLabels = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+    diasLabels.forEach(d => {
+        const div = document.createElement('div'); 
+        div.style.color='#8E8E93'; 
+        div.textContent = d; 
+        grid.appendChild(div);
+    });
+
+    const firstDayRaw = new Date(year, month, 1).getDay();
+    // 2. Ajuste para que Lunes sea 0 y Domingo sea 6
+    const firstDay = (firstDayRaw === 0) ? 6 : firstDayRaw - 1;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+    for(let d=1; d<=daysInMonth; d++) {
+        const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const qty = h.history[key] || 0;
+        const goal = h.goal;
+        const progress = Math.min(1, qty / goal);
+        
+        // El perímetro de un círculo con radio 18 es ~113
+        const radius = 18;
+        const circ = 2 * Math.PI * radius;
+        const offset = circ - (progress * circ);
+
+        const cell = document.createElement('div');
+        cell.className = 'dayCell';
+        
+        // Insertamos el SVG del Ring
+        cell.innerHTML = `
+            <svg class="ring" viewBox="0 0 44 44">
+                <circle class="ring-bg" cx="22" cy="22" r="${radius}"></circle>
+                <circle class="ring-fg" cx="22" cy="22" r="${radius}" 
+                    style="stroke-dasharray: ${circ}; stroke-dashoffset: ${offset}; color: ${h.iconColor}; opacity: ${qty > 0 ? 1 : 0}">
+                </circle>
+            </svg>
+            <span class="dayNum">${d}</span>
+        `;
+
+        // Si está completado, podemos resaltar el número o el fondo opcionalmente
+        if(qty >= goal) {
+            cell.querySelector('.dayNum').style.color = h.iconColor;
+            cell.querySelector('.dayNum').style.fontWeight = '700';
+        }
+
+        grid.appendChild(cell);
+    }
+}
+function changeMonth(dir) { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); }
+// Variable global para controlar qué semana vemos (0 = actual, -1 = anterior, etc.)
+let weekOffset = 0;
+function updateChart() {
+    const h = habits[currentHabitIdx];
+    if (!h) return;
+
+    const bars = document.querySelectorAll('.day .fill');
+    const daysContainer = document.querySelectorAll('.day');
+    const weekLabel = document.getElementById('weekLabel');
+    
+    let now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    let dayOfWeek = now.getDay(); 
+    let diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    
+    let startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() + diffToMonday + (weekOffset * 7));
+
+    // --- NUEVA LÓGICA DE ESCALA ---
+    // Calculamos el valor máximo de la semana para que las barras se ajusten
+    let weeklyValues = [];
+    for (let i = 0; i < 7; i++) {
+        let d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        let key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        weeklyValues.push(h.history[key] || 0);
+    }
+    
+    // El máximo será el valor más alto registrado o la meta (lo que sea mayor)
+    let maxInChart = Math.max(...weeklyValues, h.goal);
+
+    // Etiqueta de la semana
+    let endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    weekLabel.textContent = `${startOfWeek.getDate()} ${startOfWeek.toLocaleString('es-ES', {month:'short'})} - ${endOfWeek.getDate()} ${endOfWeek.toLocaleString('es-ES', {month:'short'})}`;
+
+    for (let i = 0; i < 7; i++) {
+        let d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        let key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        
+        let qty = h.history[key] || 0;
+        let isToday = d.toDateString() === new Date().toDateString();
+        let isComplete = qty >= h.goal;
+
+        // Calculamos la altura relativa al máximo de la semana
+        let heightPercentage = (qty / maxInChart) * 100;
+
+        if (bars[i]) {
+            // 1. Ajuste de altura y color
+            bars[i].style.height = `${heightPercentage}%`;
+            bars[i].style.backgroundColor = isToday ? h.iconColor : "#D1D1D6"; // Color solo si es hoy
+            
+            // 2. Gestionar el Check (si qty >= goal)
+            // Eliminamos check anterior si existe
+            const existingCheck = daysContainer[i].querySelector('.check-mark');
+            if (existingCheck) existingCheck.remove();
+
+            if (isComplete) {
+                const check = document.createElement('div');
+                check.className = 'check-mark';
+                check.textContent = '􀁣'; // Icono de check (SF Pro)
+                check.style.cssText = `color: ${h.iconColor};`;
+                daysContainer[i].appendChild(check);
+            }
+
+            // 3. Estilo del texto inferior
+            const dayLabel = daysContainer[i].querySelector('.dayLabel');
+            dayLabel.style.color = isToday ? h.iconColor : "#8E8E93";
+            dayLabel.style.fontWeight = isToday ? 'bold' : '500';
+        } 
+    }
+}
+
+document.getElementById('prevWeek').onclick = () => {
+    weekOffset--;
+    updateChart();
+};
+
+document.getElementById('nextWeek').onclick = () => {
+    weekOffset++;
+    updateChart();
+};
+
+updateChart();
 
 function applyAnimations(container, firstPositions) {
     requestAnimationFrame(() => {

@@ -1,116 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hábitos - Principal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FFFFFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-
 <header>
   <div class="topbar">
-   <div class="cont">
-      <div class="bigt">Hábitos</div>
-   </div>
-   <div id="dateSelector"><input type="date" id="selectedDate"></div>   
-   </div>
+    <div class="cont">
+       <div class="bigt">Hábitos</div>
+    </div>
+    <div id="dateSelector">
+        <input type="date" id="selectedDate">
+    </div>   
+  </div>
 </header>
 
 <button id="addHabitBtn">􀅼</button>
 <main id="habitsContainer"></main>
 
+<!-- SHEET CREAR / EDITAR HÁBITO -->
 <div id="createSheet" class="sheetContent" style="min-height: 99%;">
    <div class="headerB">
         <div class="spaceline">
             <div class="line"></div>
         </div>
         <div class="centro">
-            <button class="btn-cancel" onclick="closeSheet('createSheet')">􀆄</button>
+            <button class="btn-cancel" onclick="handleCloseHabit()">􀆄</button>
             <div class="subtitle">Hábito</div>
             <button class="btn-action" onclick="saveHabit()">􀏈</button>
         </div>
     </div>
+
     <div class="iconTrigger" id="iconPickerTrigger">􀓔</div>
+
     <div class="form">
       <input type="text" id="hName" class="field" placeholder="Nombre del hábito">
+
       <div class="table">
-         <div class="row" style="border:none; justify-content: center; padding: 12px 0;">
-<div class="colorPresets">
-  <input type="radio" name="presetColor" id="color1" value="#ea4e3d">
-  <label for="color1" style="background:#ea4e3d;"></label>
-  
-  <input type="radio" name="presetColor" id="color2" value="#f09a37">
-  <label for="color2" style="background:#f09a37;"></label>
-  
-  <input type="radio" name="presetColor" id="color3" value="#FFCC00">
-  <label for="color3" style="background:#FFCC00;"></label>
-  
-  <input type="radio" name="presetColor" id="color4a" value="#34C759">
-  <label for="color4a" style="background:#34C759;"></label>
-  
-  <input type="radio" name="presetColor" id="color4b" value="#00C8B3">
-  <label for="color4b" style="background:#00C8B3;"></label>
-  
-  <input type="radio" name="presetColor" id="color4c" value="#00C3D0">
-  <label for="color4c" style="background:#00C3D0;"></label>
-  
-  <input type="radio" name="presetColor" id="color5a" value="#007aff">
-  <label for="color5a" style="background:#007aff;"></label>
+        <div class="colorPresets">
+            <input type="radio" name="presetColor" id="color1" value="#ea4e3d"><label for="color1" style="background:#ea4e3d;"></label>
+            <input type="radio" name="presetColor" id="color2" value="#f09a37"><label for="color2" style="background:#f09a37;"></label>
+            <input type="radio" name="presetColor" id="color3" value="#FFCC00"><label for="color3" style="background:#FFCC00;"></label>
+            <input type="radio" name="presetColor" id="color4" value="#34C759"><label for="color4" style="background:#34C759;"></label>
+            <input type="radio" name="presetColor" id="color5" value="#00C8B3"><label for="color5" style="background:#00C8B3;"></label>
+            <input type="radio" name="presetColor" id="color6" value="#00C3D0"><label for="color6" style="background:#00C3D0;"></label>
+            <input type="radio" name="presetColor" id="color7" value="#007aff"><label for="color7" style="background:#007aff;"></label>
+            <input type="radio" name="presetColor" id="color8" value="#5856ce"><label for="color8" style="background:#5856ce;"></label>
+            <input type="radio" name="presetColor" id="color9" value="#844ed5"><label for="color9" style="background:#844ed5;"></label>
+            <input type="radio" name="presetColor" id="color10" value="#ce9cd5"><label for="color10" style="background:#ce9cd5;"></label>
+            <input type="radio" name="presetColor" id="color11" value="#d7506b"><label for="color11" style="background:#d7506b;"></label>
+            <input type="radio" name="presetColor" id="color12" value="#d1a8a0"><label for="color12" style="background:#d1a8a0;"></label>
+            <input type="radio" name="presetColor" id="color13" value="#998567"><label for="color13" style="background:#998567;"></label>
 
-  <input type="radio" name="presetColor" id="color5b" value="#5856ce">
-  <label for="color5b" style="background:#5856ce;"></label>
-
-  <input type="radio" name="presetColor" id="color5c" value="#CB30E0">
-  <label for="color5c" style="background:#CB30E0;"></label>
-
-  <input type="radio" name="presetColor" id="color5d" value="#d7506b">
-  <label for="color5d" style="background:#d7506b;"></label>
-
-  <input type="radio" name="presetColor" id="color5e" value="#d1a8a0">
-  <label for="color5e" style="background:#d1a8a0;"></label>
-
-  <input type="radio" name="presetColor" id="color5f" value="#998567">
-  <label for="color5f" style="background:#998567;"></label>
-
-  <div class="colorPickerWrap">
-     <input type="color" id="iconColorPicker" value="#007AFF">
-     <div class="colorPreview" id="colorPreview" style="background:#007AFF;"></div>
-  </div>
-</div>
-
-         </div>
+            <div class="colorPickerWrap">
+                <input type="color" id="iconColorPicker" value="#007AFF">
+                <div class="colorPreview" id="colorPreview" style="background:#007AFF;"></div>
+            </div>
+        </div>
       </div>
-    <div class="table">
-        <div class="row"><input type="text" id="uSing" class="field" placeholder="Unidad singular"></div>
-        <div class="row"><input type="text" id="uPlur" class="field" placeholder="Unidad plural"></div>
-    </div>
-    <div class="table">
-        <div class="row"><input type="number" id="hGoal" class="field" placeholder="Meta diaria" inputmode="numeric"></div>
-        <div class="row"><input type="number" id="hStep" class="field"placeholder="Paso" inputmode="numeric"></div>
-    </div>
-    <div class="table">
-    </div>
+
+      <div class="table">
+          <div class="row"><input type="text" id="uSing" class="field" placeholder="Unidad singular"></div>
+          <div class="row"><input type="text" id="uPlur" class="field" placeholder="Unidad plural"></div>
+      </div>
+
+      <div class="table">
+          <div class="row"><input type="number" id="hGoal" class="field" placeholder="Meta diaria" inputmode="numeric"></div>
+          <div class="row"><input type="number" id="hStep" class="field" placeholder="Paso" inputmode="numeric"></div>
+      </div>
+
+      <div class="table">
+        <div class="row">
+            <span class="label">Hora</span>
+            <input type="time" id="hTime" class="field">
+        </div>
+        <div class="row">
+            <span class="label">Repetir</span>
+            <select id="hFreq" class="field">
+                <option value="daily">Diariamente</option>
+                <option value="weekly">Semanalmente</option>
+                <option value="monthly">Mensualmente</option>
+            </select>
+        </div>
+      </div>
    </div>
 </div>
 
+<!-- SHEET VER HÁBITO -->
 <div id="viewSheet" class="sheetContent" style="text-align: center;">
    <div class="headerA">
-        <div class="spaceline">
-            <div class="line"></div>
-        </div>
+        <div class="spaceline"><div class="line"></div></div>
         <div class="centro">
-            <button class="btn-cancel" onclick="closeSheet('viewSheet')">􀆄</button>
+            <button class="btn-cancel" onclick="handleCloseHabit()">􀆄</button>
             <div class="actions">
-                    <button class="action pair" onclick="openStreak()">􁂥</button>
+                <button class="action pair" onclick="openStreak()">􁂥</button>
                 <div class="pair">
                     <button class="single" onclick="deleteHabit()">􀈑</button>
                     <button class="single" onclick="editHabit()">􀈊</button>
@@ -118,110 +112,92 @@
             </div>
         </div>
     </div>
+
     <div class="form" id="view">
-    <div id="vIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
-    <div class="habito" id="vName"></div>
-    <div id="vUnitLabel" ></div>
-    
-    <div class="qtyControls">
-        <button class="plusminus" onclick="updateQty(-1)">􀅽</button>
-        <input type="number" id="vQtyManual" class="manualQtyInput" defaultValue="0">
-        <button class="plusminus" onclick="updateQty(1)">􀅼</button>
-    </div>
-    <div class="down">
-        <div class="btones">
-            <button class="btn btn-gray" onclick="clearQty()">Vaciar</button>
-            <button class="btn btn-blue" onclick="setComplete()">Completar</button>
+        <div id="vIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
+        <div class="habito" id="vName"></div>
+        <div id="vUnitLabel"></div>
+
+        <div class="qtyControls">
+            <button class="plusminus" onclick="updateQty(-1)">􀅽</button>
+            <input type="number" id="vQtyManual" class="manualQtyInput" value="0">
+            <button class="plusminus" onclick="updateQty(1)">􀅼</button>
         </div>
-     </div>
-     
+
+        <div class="down">
+            <div class="btones">
+                <button class="btn btn-gray" onclick="clearQty()">Vaciar</button>
+                <button class="btn btn-blue" onclick="setComplete()">Completar</button>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- ICON PICKER -->
 <div id="iconPickerSheet" class="sheetContent">
     <div class="headerIcons">
-        <div class="spaceline">
-            <div class="line"></div>
-        </div>
+        <div class="spaceline"><div class="line"></div></div>
         <div class="duo">
-            <button class="btn-cancel" onclick="closeSheet('iconPickerSheet')">􀆄</button>
+            <button class="btn-cancel" onclick="closeSheet('iconPickerSheet'); openSheet('createSheet');">􀆄</button>
             <div class="subtitle">Icono</div>
             <button class="btn-action" id="confirmIconBtn">􀆅</button>
         </div>
+        <div class="searchBar">
+            <input type="text" id="iconSearch" placeholder="Buscar" autocomplete="off">
+        </div>
     </div>
-    <div class="iconGrid" id="iconGrid"></div>
+    <div id="iconGrid"></div>
 </div>
 
+<!-- STREAK -->
 <div id="streakSheet" class="sheetContent">
    <div class="headerA">
-        <div class="spaceline">
-            <div class="line"></div>
-        </div>
+        <div class="spaceline"><div class="line"></div></div>
         <div class="conjunto">
             <button class="btn-cancel" onclick="closeSheet('streakSheet')">􀆄</button>
         </div>
     </div>
-    <div class="screen">
-            <div class="streakBadge">
-                <div class="fire">􀙭</div>
-                <div id="streakValue">0</div>
-                <div id="streakText">
-                Días de racha
-                </div>
-            </div>
-            <hr>
-            <div class="subt">Actividad por mes</div>
-            <div class="month">
-                <div class="datenav">
-                    <button class="navbtns" onclick="changeMonth(-1)">􀯶</button>
-                    <div class="heading" id="calTitle"></div>
-                    <button class="navbtns" onclick="changeMonth(1)">􀯻</button>
-                </div>
-                <div class="calGrid" id="calGrid"></div>
-            </div>
 
-            <div class="subt">Vista semanal</div>
-            <div class="weekTracker">
+    <div class="screen">
+        <div class="streakBadge">
+            <div class="fire">􀙭</div>
+            <div id="streakValue">0</div>
+            <div id="streakText">Días de racha</div>
+        </div>
+
+        <hr>
+
+        <div class="subt">Actividad por mes</div>
+        <div class="month">
+            <div class="datenav">
+                <button class="navbtns" onclick="changeMonth(-1)">􀯶</button>
+                <div class="heading" id="calTitle"></div>
+                <button class="navbtns" onclick="changeMonth(1)">􀯻</button>
+            </div>
+            <div class="calGrid" id="calGrid"></div>
+        </div>
+
+        <div class="subt">Vista semanal</div>
+        <div class="weekTracker">
             <div class="weekNav">
                 <button class="navbtns" id="prevWeek">􀯶</button>
                 <div class="heading" id="weekLabel"></div>
                 <button class="navbtns" id="nextWeek">􀯻</button>
             </div>
-
             <div class="chart">
-                <!-- 7 días -->
-                <div class="day" data-day="0">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">L</div>
-                </div>
-                <div class="day" data-day="1">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">M</div>
-                </div>
-                <div class="day" data-day="2">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">M</div>
-                </div>
-                <div class="day" data-day="3">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">J</div>
-                </div>
-                <div class="day" data-day="4">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">V</div>
-                </div>
-                <div class="day" data-day="5">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">S</div>
-                </div>
-                <div class="day" data-day="6">
-                <div class="bar"><div class="fill"></div></div>
-                <div class="dayLabel">D</div>
-                </div>
+                <div class="day" data-day="0"><div class="bar"><div class="fill"></div></div><div class="dayLabel">L</div></div>
+                <div class="day" data-day="1"><div class="bar"><div class="fill"></div></div><div class="dayLabel">M</div></div>
+                <div class="day" data-day="2"><div class="bar"><div class="fill"></div></div><div class="dayLabel">M</div></div>
+                <div class="day" data-day="3"><div class="bar"><div class="fill"></div></div><div class="dayLabel">J</div></div>
+                <div class="day" data-day="4"><div class="bar"><div class="fill"></div></div><div class="dayLabel">V</div></div>
+                <div class="day" data-day="5"><div class="bar"><div class="fill"></div></div><div class="dayLabel">S</div></div>
+                <div class="day" data-day="6"><div class="bar"><div class="fill"></div></div><div class="dayLabel">D</div></div>
             </div>
+        </div>
+    </div>
 </div>
-</div>
-</div>
-</div>
+
+<script src="icons.js"></script>
+<script src="habits.js"></script>
 </body>
 </html>

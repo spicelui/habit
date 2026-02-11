@@ -1,14 +1,11 @@
 // --- ESTADO GLOBAL Y CARGA DE DATOS ---
 let habits = JSON.parse(localStorage.getItem('habits') || '[]');
-let routines = JSON.parse(localStorage.getItem('routines') || '[]');
 let currentHabitIdx = null;
 let selectedDate = new Date().toISOString().split('T')[0];
 let activeSheet = null;
 let previousSheet = null;
-let isNavigatingFromRoutine = false;
 let zCounter = 1000;
 let ignoreNextClick = false;
-let currentView = 'habits';
 
 function genId() {
     return 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -37,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         iconSearch.addEventListener('input', (e) => initIcons(e.target.value));
     }
 
-    if (typeof updateRoutineSelects === 'function') updateRoutineSelects();
     initIcons();
     renderHabits();
 });
@@ -62,7 +58,6 @@ function openSheet(id) {
     content.style.zIndex = zCounter;
     requestAnimationFrame(() => { content.classList.add('active'); });
 }
-
 function closeSheet(id = activeSheet, cb = null) {
     const content = document.getElementById(id);
     if (!content || content.classList.contains('closing')) return;
@@ -71,26 +66,16 @@ function closeSheet(id = activeSheet, cb = null) {
     content.classList.remove('active');
     content.classList.add('closing');
 
-    const returningToRoutine = (id !== 'routineViewSheet') && isNavigatingFromRoutine;
+    // IMPORTANTE: Si estamos cerrando la que está activa, 
+    // la marcamos como null de inmediato para que no pise a la siguiente
+    if (id === activeSheet) activeSheet = null; 
 
-    content.addEventListener('transitionend', function handler() {
+    setTimeout(() => {
         content.style.display = 'none';
         content.classList.remove('closing');
-
-        if (returningToRoutine) {
-            activeSheet = 'routineViewSheet';
-            openSheet('routineViewSheet');
-        } else {
-            if (id === activeSheet) activeSheet = null;
-        }
-
         if (cb) cb();
-        setTimeout(() => { ignoreNextClick = false; }, 100);
-        content.removeEventListener('transitionend', handler);
-    }, { once: true });
+    }, 400);
 }
-
-// Cerrar al clickear fuera
 document.addEventListener('click', (e) => {
     const prompt = document.getElementById('customPrompt');
     if (prompt && prompt.style.display === 'flex') return;
@@ -101,14 +86,35 @@ document.addEventListener('click', (e) => {
         closeSheet(activeSheet);
     }
 });
+document.addEventListener('click', () => {
+    ignoreNextClick = false;
+}, true);
 
-// --- SISTEMA DE ICONOS (USA icons.js) ---
 let selectedIcon = '􀓔';
 let selectedColor = '#0076ff';
-const iconTrigger = document.getElementById('iconPickerTrigger');
-const colorPicker = document.getElementById('iconColorPicker');
-const preview = document.getElementById('colorPreview');
 
+const colorPicker = document.getElementById('iconColorPicker');
+    const preview = document.getElementById('colorPreview');
+    const iconTrigger = document.getElementById('iconPickerTrigger');
+
+    if (colorPicker) {
+        colorPicker.addEventListener('input', (e) => {
+            selectedColor = e.target.value;
+            preview.style.background = selectedColor;
+            iconTrigger.style.color = selectedColor;
+            initIcons();
+        });
+    }
+
+    document.querySelectorAll('input[name="presetColor"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            selectedColor = e.target.value;
+            preview.style.background = selectedColor;
+            iconTrigger.style.color = selectedColor;
+            if (colorPicker) colorPicker.value = selectedColor;
+            initIcons();
+        });
+    });
 function initIcons(filter = "") {
     const grid = document.getElementById('iconGrid');
     if (!grid || typeof iconData === 'undefined') return;
@@ -126,54 +132,71 @@ function initIcons(filter = "") {
 
             filteredIcons.forEach(icon => {
                 const div = document.createElement('div');
-                div.className = 'iconItem' + (icon.char === selectedIcon ? ' selected' : '');
-                if (icon.char === selectedIcon) div.style.color = selectedColor;
+                div.className = 'iconItem';
+
                 div.textContent = icon.char;
+
+                if (icon.char === selectedIcon) {
+                    div.classList.add('selected');
+                    div.style.color = selectedColor;
+                } else {
+                    div.style.color = '#8e8e93'; // color base
+                }
+
                 div.onclick = () => {
                     selectedIcon = icon.char;
-                    if (iconTrigger) iconTrigger.textContent = selectedIcon;
-                    initIcons(filter);
+                    if (iconTrigger) {
+                        iconTrigger.textContent = selectedIcon;
+                        iconTrigger.style.color = selectedColor;
+                    }
+                    closeSheet('iconPickerSheet', () => {
+                        openSheet('createSheet');
+                    });
                 };
+
+
                 subGrid.appendChild(div);
             });
+
             catWrap.appendChild(subGrid);
             grid.appendChild(catWrap);
         }
     }
 }
 
-// --- RENDERIZADO ---
 function renderHabits(updatedId = null) {
     const container = document.getElementById('habitsContainer');
     if (!container) return;
 
     const firstPositions = {};
-    [...container.children].forEach(el => { if (el.dataset.id) firstPositions[el.dataset.id] = el.getBoundingClientRect(); });
+    [...container.children].forEach(el => { 
+        if (el.dataset.id) firstPositions[el.dataset.id] = el.getBoundingClientRect(); 
+    });
 
+    // Filtro simple sin rutinas
     const activeHabits = habits.filter(h => {
         const date = new Date(selectedDate + "T00:00:00");
-        if (currentView === 'habits' && h.routineId && h.time && h.frequency === 'daily') return false;
         if (h.frequency === 'weekly') return date.getDay() === 1;
         if (h.frequency === 'monthly') return date.getDate() === 1;
         return true;
     });
 
-    if (currentView === 'habits') {
-        const sorted = [...activeHabits].sort((a, b) => {
-            const ca = (a.history[selectedDate] || 0) >= a.goal;
-            const cb = (b.history[selectedDate] || 0) >= b.goal;
-            if (ca !== cb) return ca ? 1 : -1;
-            return (a.time || "99:99").localeCompare(b.time || "99:99");
-        });
-        container.innerHTML = sorted.length > 0 
-            ? sorted.map(h => getHabitCardHTML(h, updatedId)).join('')
-            : `<div style="text-align:center; color:#8e8e93; margin-top:40px;">No hay hábitos para hoy</div>`;
-    } else if (typeof renderRoutinesView === 'function') {
-        renderRoutinesView(container, activeHabits);
-    }
+    const sorted = [...activeHabits].sort((a, b) => {
+        const ca = (a.history[selectedDate] || 0) >= a.goal;
+        const cb = (b.history[selectedDate] || 0) >= b.goal;
+        if (ca !== cb) return ca ? 1 : -1;
+        return (a.time || "99:99").localeCompare(b.time || "99:99");
+    });
+
+    container.innerHTML = sorted.length > 0 
+        ? sorted.map(h => getHabitCardHTML(h, updatedId)).join('')
+        : `<div style="text-align:center; color:#8e8e93; margin-top:40px;">
+            No hay hábitos para hoy
+          </div>`;
 
     applyAnimations(container, firstPositions);
 }
+
 function getHabitCardHTML(h, updatedId) {
     const i = habits.findIndex(x => x.id === h.id);
     const qty = h.history[selectedDate] || 0;
@@ -183,27 +206,35 @@ function getHabitCardHTML(h, updatedId) {
     const startWidth = (h.id === updatedId) ? 0 : progress;
 
     return `
-        <div class="habitCard ${isComplete ? 'completed' : ''}" data-id="${h.id}" 
-             style="background-color: ${h.iconColor}12" onclick="openView(${i})">
-            <div class="habitIconCircle" style="color: ${h.iconColor}">${h.icon}</div>
-            <div class="habitInfo">
-                <div class="cont">
+        <div class="habitCard ${isComplete ? 'completed' : ''}" data-id="${h.id}" style="background-color: ${h.iconColor}12" onclick="openView(${i})">
+            <div class="supcard">
+                <div class="habitIconCircle" style="color: ${h.iconColor}">${h.icon}</div>
+                <div class="habitInfo">
                     <div class="details">
                         <div class="dup">
                             <div class="habitName">${h.name}</div>
-                            ${streak > 0 ? `<span class="streak">􀙭 <div class="streaknum">${streak}</div></span>` : ''}
                         </div>
-                        ${h.time ? `<div class="habitTime">􀐫 ${h.time}</div>` : ''}
+                        ${h.time ? `<div class="habitTime">${h.time}</div>` : ''}
                     </div>
                 </div>
-                ${h.goal > 1 ? `
+                
+                ${streak > 0 ? `<span class="streak">􀙭 <div class="streaknum">${streak}</div></span>` : ''}
+            
+                <button class="botoncito" style="background-color: ${isComplete ? h.iconColor + '70' : h.iconColor}"
+                        onclick="event.stopPropagation(); ${isComplete ? 'openStreak()' : `updateQty(1, ${i})`}">
+                    ${isComplete ? '􀆅' : '􀅼'}
+                </button>
+            </div>
+    
+            
+            ${h.goal > 1 ? `
+            <div class="progress">
                 <div class="habitProgressBar">
-                    <div class="habitProgressBarInner" 
-                         data-w="${progress}%" 
-                         style="width: ${startWidth}%; background: ${h.iconColor};">
+                    <div class="habitProgressBarInner" data-w="${progress}%" style="width: ${startWidth}%; background: ${h.iconColor};">
                     </div>
                 </div>` : ''}
-                ${h.goal > 1 ? `<div class="habitProgressBadge" style="color: ${h.iconColor}">
+                ${h.goal > 1 ? `
+                <div class="habitProgressBadge" style="color: ${h.iconColor}">
                     ${(qty != 0 && qty != h.goal) ? `
                     <div class="cantidad">
                         <div class="hecho">${qty} ${qty != 1 ? h.uPlur : h.uSing}</div>
@@ -211,10 +242,6 @@ function getHabitCardHTML(h, updatedId) {
                     </div>` : ''}
                 </div>` : ''}
             </div>
-            <button class="botoncito" style="background-color: ${isComplete ? h.iconColor + '70' : h.iconColor}"
-                    onclick="event.stopPropagation(); ${isComplete ? 'openStreak()' : `updateQty(1, ${i})`}">
-                ${isComplete ? '􀆅' : '􀅼'}
-            </button>
         </div>`;
 }
 
@@ -244,7 +271,6 @@ function saveHabit() {
         step: parseInt(document.getElementById('hStep').value) || 1,
         time: document.getElementById('hTime').value || null,
         frequency: document.getElementById('hFreq').value,
-        routineId: document.getElementById('hRoutine').value || null,
         icon: selectedIcon,
         iconColor: selectedColor,
         history: currentHabitIdx !== null ? habits[currentHabitIdx].history : {}
@@ -256,7 +282,6 @@ function saveHabit() {
     localStorage.setItem('habits', JSON.stringify(habits));
     renderHabits();
     closeSheet('createSheet');
-    if (typeof updateRoutineSelects === 'function') updateRoutineSelects();
 }
 
 function deleteHabit() {
@@ -276,7 +301,38 @@ function updateQty(dir, idx = null) {
     if (idx === null) document.getElementById('vQtyManual').value = h.history[selectedDate];
     renderHabits(h.id);
 }
+// --- FUNCIONES PARA VIEW SHEET ---
 
+function clearQty() {
+    if (currentHabitIdx === null) return;
+    const h = habits[currentHabitIdx];
+    h.history[selectedDate] = 0; // Ponemos a cero
+    
+    localStorage.setItem('habits', JSON.stringify(habits));
+    document.getElementById('vQtyManual').value = 0; // Actualizamos el input
+    renderHabits(h.id); // Refrescamos la lista del fondo
+}
+
+function setComplete() {
+    if (currentHabitIdx === null) return;
+    const h = habits[currentHabitIdx];
+    h.history[selectedDate] = h.goal; // Igualamos a la meta
+    
+    localStorage.setItem('habits', JSON.stringify(habits));
+    document.getElementById('vQtyManual').value = h.goal; // Actualizamos input
+    renderHabits(h.id); // Refrescamos lista
+    
+    // Opcional: Cerrar la hoja al completar
+    // handleCloseHabit(); 
+}
+document.getElementById('vQtyManual').oninput = (e) => {
+    if (currentHabitIdx === null) return;
+    const val = parseInt(e.target.value) || 0;
+    const h = habits[currentHabitIdx];
+    h.history[selectedDate] = Math.max(0, val);
+    localStorage.setItem('habits', JSON.stringify(habits));
+    renderHabits(h.id);
+};
 // --- UTILIDADES ---
 function getStreak(h) {
     let streak = 0; let curr = new Date(); curr.setHours(0,0,0,0);
@@ -318,7 +374,6 @@ function resetCreateForm() {
     document.getElementById('hGoal').value = '';
     document.getElementById('hStep').value = '';
     document.getElementById('hTime').value = '';
-    document.getElementById('hRoutine').value = '';
     
     selectedIcon = '􀓔';
     selectedColor = '#0076ff';
@@ -359,17 +414,19 @@ function backToCreate() {
     }
 }
 
-// Confirmar icono seleccionado
-const confirmIconBtn = document.getElementById('confirmIconBtn');
-if (confirmIconBtn) {
-    confirmIconBtn.onclick = () => {
-        if (iconTrigger) {
-            iconTrigger.textContent = selectedIcon;
-            iconTrigger.style.color = selectedColor;
-        }
-        backToCreate();
-    };
-}
+document.getElementById('confirmIconBtn').onclick = () => {
+    // 1. Guardar el icono seleccionado (suponiendo que guardas la clase o el texto)
+    const activeIcon = document.querySelector('.icon-item.selected');
+    if (activeIcon) {
+        selectedIcon = activeIcon.innerText;
+        // 2. Actualizar el trigger en el formulario de creación
+        document.getElementById('iconPickerTrigger').innerText = selectedIcon;
+    }
+    
+    // 3. El flujo de cierre/apertura
+    closeSheet('iconPickerSheet');
+    openSheet('createSheet'); 
+};
 
 // Editar desde la vista de detalle
 function editHabit() {
@@ -380,7 +437,6 @@ function editHabit() {
     document.getElementById('hGoal').value = h.goal;
     document.getElementById('hStep').value = h.step;
     document.getElementById('hTime').value = h.time || '';
-    document.getElementById('hRoutine').value = h.routineId || '';
     
     selectedIcon = h.icon;
     selectedColor = h.iconColor;

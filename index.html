@@ -20,36 +20,16 @@
     <div class="cont">
        <div class="bigt">Hábitos</div>
     </div>
-    <div id="dateSelector"><input type="date" id="selectedDate"></div>   
-    <div class="segmented-control-container">
-        <div class="segmented-control">
-            <input type="radio" name="view-switch" id="view-habits" checked>
-            <label for="view-habits" onclick="window.location.href='index.html'">Hábitos</label>
-
-            <input type="radio" name="view-switch" id="view-routines">
-            <label for="view-routines" onclick="window.location.href='rutinas.html'">Rutinas</label>
-            
-            <div class="selection-slider"></div>
-        </div>
-    </div>
+    <div id="dateSelector">
+        <input type="date" id="selectedDate">
+    </div>   
   </div>
 </header>
 
 <button id="addHabitBtn">􀅼</button>
 <main id="habitsContainer"></main>
 
-<div id="customPrompt" class="custom-alert-overlay">
-    <div class="custom-alert">
-        <div class="alert-title">Nueva Rutina</div>
-        <div class="alert-message">Ingresa el nombre para agrupar tus hábitos.</div>
-        <input type="text" id="routineInput" class="alert-input" placeholder="Ej: Mañana, Gym..." autocomplete="off">
-        <div class="alert-buttons">
-            <button onclick="closeCustomPrompt(event)" class="alert-btn cancel">Cancelar</button>
-            <button onclick="confirmCustomPrompt()" class="alert-btn confirm">Crear</button>
-        </div>
-    </div>
-</div>
-
+<!-- SHEET CREAR / EDITAR HÁBITO -->
 <div id="createSheet" class="sheetContent" style="min-height: 99%;">
    <div class="headerB">
         <div class="spaceline">
@@ -61,9 +41,12 @@
             <button class="btn-action" onclick="saveHabit()">􀏈</button>
         </div>
     </div>
+
     <div class="iconTrigger" id="iconPickerTrigger">􀓔</div>
+
     <div class="form">
       <input type="text" id="hName" class="field" placeholder="Nombre del hábito">
+
       <div class="table">
         <div class="colorPresets">
             <input type="radio" name="presetColor" id="color1" value="#ea4e3d"><label for="color1" style="background:#ea4e3d;"></label>
@@ -79,22 +62,29 @@
             <input type="radio" name="presetColor" id="color11" value="#d7506b"><label for="color11" style="background:#d7506b;"></label>
             <input type="radio" name="presetColor" id="color12" value="#d1a8a0"><label for="color12" style="background:#d1a8a0;"></label>
             <input type="radio" name="presetColor" id="color13" value="#998567"><label for="color13" style="background:#998567;"></label>
+
             <div class="colorPickerWrap">
                 <input type="color" id="iconColorPicker" value="#007AFF">
                 <div class="colorPreview" id="colorPreview" style="background:#007AFF;"></div>
             </div>
         </div>
       </div>
+
       <div class="table">
           <div class="row"><input type="text" id="uSing" class="field" placeholder="Unidad singular"></div>
           <div class="row"><input type="text" id="uPlur" class="field" placeholder="Unidad plural"></div>
       </div>
+
       <div class="table">
           <div class="row"><input type="number" id="hGoal" class="field" placeholder="Meta diaria" inputmode="numeric"></div>
-          <div class="row"><input type="number" id="hStep" class="field"placeholder="Paso" inputmode="numeric"></div>
+          <div class="row"><input type="number" id="hStep" class="field" placeholder="Paso" inputmode="numeric"></div>
       </div>
+
       <div class="table">
-        <div class="row"><span class="label">Hora</span><input type="time" id="hTime" class="field"></div>
+        <div class="row">
+            <span class="label">Hora</span>
+            <input type="time" id="hTime" class="field">
+        </div>
         <div class="row">
             <span class="label">Repetir</span>
             <select id="hFreq" class="field">
@@ -104,16 +94,10 @@
             </select>
         </div>
       </div>
-      <div class="table">
-        <div class="row" style="display: flex; align-items: center; gap: 10px;">
-            <span class="label">Rutina</span>
-            <select id="hRoutine" class="field" style="flex: 1;"></select>
-            <button type="button" onclick="promptNewRoutine()">􀅼</button>
-        </div>
-      </div>
    </div>
 </div>
 
+<!-- SHEET VER HÁBITO -->
 <div id="viewSheet" class="sheetContent" style="text-align: center;">
    <div class="headerA">
         <div class="spaceline"><div class="line"></div></div>
@@ -128,15 +112,18 @@
             </div>
         </div>
     </div>
+
     <div class="form" id="view">
         <div id="vIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
         <div class="habito" id="vName"></div>
         <div id="vUnitLabel"></div>
+
         <div class="qtyControls">
             <button class="plusminus" onclick="updateQty(-1)">􀅽</button>
-            <input type="number" id="vQtyManual" class="manualQtyInput" defaultValue="0">
+            <input type="number" id="vQtyManual" class="manualQtyInput" value="0">
             <button class="plusminus" onclick="updateQty(1)">􀅼</button>
         </div>
+
         <div class="down">
             <div class="btones">
                 <button class="btn btn-gray" onclick="clearQty()">Vaciar</button>
@@ -146,11 +133,12 @@
     </div>
 </div>
 
+<!-- ICON PICKER -->
 <div id="iconPickerSheet" class="sheetContent">
     <div class="headerIcons">
         <div class="spaceline"><div class="line"></div></div>
         <div class="duo">
-            <button class="btn-cancel" onclick="backToCreate()">􀆄</button>
+            <button class="btn-cancel" onclick="closeSheet('iconPickerSheet'); openSheet('createSheet');">􀆄</button>
             <div class="subtitle">Icono</div>
             <button class="btn-action" id="confirmIconBtn">􀆅</button>
         </div>
@@ -161,6 +149,7 @@
     <div id="iconGrid"></div>
 </div>
 
+<!-- STREAK -->
 <div id="streakSheet" class="sheetContent">
    <div class="headerA">
         <div class="spaceline"><div class="line"></div></div>
@@ -168,13 +157,16 @@
             <button class="btn-cancel" onclick="closeSheet('streakSheet')">􀆄</button>
         </div>
     </div>
+
     <div class="screen">
         <div class="streakBadge">
             <div class="fire">􀙭</div>
             <div id="streakValue">0</div>
             <div id="streakText">Días de racha</div>
         </div>
+
         <hr>
+
         <div class="subt">Actividad por mes</div>
         <div class="month">
             <div class="datenav">
@@ -184,6 +176,7 @@
             </div>
             <div class="calGrid" id="calGrid"></div>
         </div>
+
         <div class="subt">Vista semanal</div>
         <div class="weekTracker">
             <div class="weekNav">
@@ -203,6 +196,7 @@
         </div>
     </div>
 </div>
+
 <script src="icons.js"></script>
 <script src="habits.js"></script>
 </body>

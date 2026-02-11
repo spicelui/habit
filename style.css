@@ -39,7 +39,9 @@ input:focus::placeholder{
 html, body {
   touch-action: pan-x pan-y;
 }
-
+html{
+    font: -apple-system-body;
+}
 body {
     margin: 0;
     background: white;
@@ -56,10 +58,10 @@ body {
     background: #ececec36;
     backdrop-filter: blur(7px) saturate(1.5) brightness(1.14);
     box-shadow: inset 0 0 8px 1px #0000002c, 0 0 18px 0 #00000011;
-    padding: 9px 15px;
-    border-radius: 20px;
+    padding: 0.56rem 0.93rem;
+    border-radius: 1.2rem;
     font-weight: 430;
-    font-size: 17px;
+    font-size: 1.02rem;
     color: #00000077; 
     transition: 400ms;
 }
@@ -77,20 +79,20 @@ main {
 /* --- Action Button --- */
 
 #addHabitBtn {
-    width: 64px;
-    height: 64px;
+    width: 3.76rem;
+    height: 3.76rem;
     border-radius: 50%;
     background: #00000060;
     backdrop-filter: blur(18px) contrast(1.3) brightness(0.4) saturate(10);
     color: rgb(255, 255, 255);
     border: none;
     font-family: 'sf';
-    font-size: 24px;
+    font-size: 1.41rem;
     font-weight: 600;
     z-index: 90;
     position: fixed;
     bottom: 74px;
-    left: calc(50% - 25px);
+    left: calc(50% - 1.5rem);
 }
 @keyframes scaleClick {
   0% { transform: scale(1); }
@@ -164,7 +166,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    background-color: #f2f2f7;
 }
 .headerA{
-   font-size: 17.5px;
+   font-size: 1.03rem;
    padding: 0 0 13px 0;
    margin-bottom: 18px;
    margin-top: -1px;
@@ -175,7 +177,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    background: #ffffff;
 }
 .headerB{
-   font-size: 17.5px;
+   font-size: 1.03rem;
    padding: 0 0 13px 0;
    margin-top: -1px;
    font-weight: 540;
@@ -185,7 +187,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    background: #f2f2f5;
 }
 .headerIcons{
-   font-size: 17.5px;
+   font-size: 1.03rem;
    padding: 0 0 8px 0;
    margin-top: -1px;
    font-weight: 540;
@@ -209,10 +211,10 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    border-radius: 30px;
 }
 .btn-cancel{
-   width: 44px;
-   height:44px;
+   width: 46px;
+   height: 46px;
    border-radius: 50%;
-   font-size: 20px;
+   font-size: 1.25rem;
    font-family: 'sf';
    font-weight: 550;
    color: #999;
@@ -221,10 +223,10 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    backdrop-filter: blur(10px);
 }
 .btn-action{
-   width: 44px;
-   height:44px;
+   width: calc(40px + 0.6rem);
+   height: calc(40px + 0.6rem);
    border-radius: 50%;
-   font-size: 20px;
+   font-size: 1.25rem;
    font-family: 'sf';
    font-weight: 550;
    color: white;
@@ -241,7 +243,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
    width: 44px;
    height:44px;
    border-radius: 50%;
-   font-size: 20px;
+   font-size: 1.25rem;
    font-family: 'sf';
    font-weight: 500;
    color: #444;
@@ -263,7 +265,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     margin: 0 7px;
 }
 .single{
-   font-size: 20px;
+   font-size: 1.18rem;
    font-family: 'sf';
    font-weight: 500;
    color: #444;
@@ -297,15 +299,15 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 .unitInputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 0.59rem;
 }
 .habito{
-    font-size: 24px;
+    font-size: 1.41rem;
     font-weight: 600;
     text-align: center;
 }
 #vUnitLabel{
-    font-size: 15.6px;
+    font-size: 0.91rem;
     color: #777;
     margin: 6px 0 20px 0;
 }
@@ -314,15 +316,15 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 .iconTrigger {
     font-family: 'sf';
     font-weight: 590;
-    width: 80px;
-    height: 80px;
+    width: 5rem;
+    height: 5rem;
     border-radius: 50%;
     background: #ffffff;
     margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 2rem;
 }
 
 .iconItem {
@@ -332,12 +334,12 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     align-items: center;
     position: relative;
     justify-content: center;
-    font-size: 23px;
+    font-size: 1.35rem;
     font-weight: 599;
     border-radius: 10px;
     background: transparent;
-    width: 48px;
-    height: 48px;
+    width: 2.82rem;
+    height: 2.82rem;
     color: #94909b;
     transition: scale 200ms;
     scale: 100%;
@@ -359,7 +361,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     color: black;
     font-weight: 600;
     border-radius: 11px;
-    font-size: 24px;
+    font-size: 1.41rem;
     transition: background 400ms, color 300ms;
 }
 .manualQtyInput:focus {
@@ -371,7 +373,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     background: #f0f0f0;
     color: black;
     font-weight: 600;
-    font-size: 24px;
+    font-size: 1.41rem;
 }
 .qtyControls{
    display:flex;
@@ -388,7 +390,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     border-radius: 40px;
     border: none;
     font-family: 'sf';
-    font-size: 18px;
+    font-size: 1.05rem;
     color: #777;
     font-weight: 500;
 }
@@ -436,7 +438,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 
 
 #vIcon {
-    font-size: 32px;
+    font-size: 1.8rem;
     width: 56px;
     height: 56px;
     display: flex;
@@ -447,8 +449,8 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 
 .botoncito {
     margin-left: 10px;
-    width: 40px;
-    height: 40px;
+    width: 2.3rem;
+    height: 2.3rem;
     border: none;
     border-radius: 50%;
     font-family: 'sf';
@@ -457,7 +459,7 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 /* --- Calendar Pro Mejorado --- */
@@ -514,8 +516,8 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 }
 
 .habitName {
-    font-size: 17px;
-    font-weight: 520;
+    font-size: 1rem;
+    font-weight: 480;
 }
 
 .cont {
@@ -525,19 +527,19 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 }
 .details{
     display: flex;
+    flex-direction: column;
+    gap: 1px;
     width: 100%;
-    justify-content: space-between;
 }
-
 .habitIconCircle {
-    width: 40px;
-    height: 40px;
+    width: 2.3rem;
+    height: 2.3rem;
     font-family: 'sf';
     background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 1.53rem;
 }
 
 .habitInfo {
@@ -549,15 +551,23 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
 }
 .habitInfo p {
     margin: 2px 0 0;
-    font-size: 13px;
+    font-size: 0.76rem;
     color: var(--text-muted);
+}.supcard, 
+.habitProgressBar, 
+.habitProgressBadge {
+    width: 100%; /* Obliga a que ocupen todo el ancho */
+}
+.progress{
+    padding: 0 8px;
 }
 .habitCard {
-    padding: 18px 24px;
-    border-radius: 33px;
+    align-items: stretch; 
+    padding: 0.9rem 1.1rem 0.9rem 22px;
+    border-radius: 1.78rem;
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    gap: 4px;
     min-height: 0;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -565,6 +575,11 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     cursor: pointer;
     transition: 300ms;
     overflow: hidden;
+}
+.supcard{
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 #habitsContainer{
     display: flex;
@@ -574,10 +589,10 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     margin-top: -20px;
 }
 .habitCard.completed .habitName {
-    opacity: 0.3;
+    opacity: 0.5;
     text-decoration: line-through;
-    text-decoration-thickness: 1.1px;
-    font-weight: 500;
+    text-decoration-thickness: 1px;
+    font-weight: 400;
 }
 
 /* El contenedor que envuelve la barra y los números */
@@ -587,7 +602,10 @@ body:has(#iconPickerSheet.active) #routineViewSheet {
     transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.4s ease;
     overflow: hidden;
 }
-
+.habitTime{
+    font-size: 0.85rem;
+    color: #000000a0;
+}
 /* Cuando el hábito tiene progreso, se expande */
 .habitCard.expanded .expandableContent {
     max-height: 100px; /* Un valor mayor al contenido real */
@@ -691,9 +709,9 @@ header {
 }
 
 .bigt {
-    font-size: 34px;
+    font-size: 2rem;
     font-weight: 700;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.05rem;
     margin: 0 0 10px 6px;
 }
 .field{
@@ -703,7 +721,7 @@ header {
     border: none;
     border-radius: 14px;
     padding: 0;
-    font-size: 17px;
+    font-size: 1rem;
     font-weight: 460;
     background: transparent ;
 }
@@ -736,16 +754,17 @@ header {
 #hName{
    width: 100%;
    height: 54px;
-   font-size: 22px;
-   font-weight: 600;
+   font-size: 1.35rem;
+   letter-spacing: -0.02rem;
+   font-weight: 550;
    background-color: white;
-   padding: 0px 20px;
+   padding: 0px 1.25rem;
    border-radius: 26px;
 }
 .colorPresets {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(calc(26px + 0.6rem), 1fr));
+    gap: 0.75rem;
     padding: 16px 0;
     width: 100%;
 }
@@ -763,8 +782,8 @@ header {
 .colorPresets label,
 .colorPickerWrap,
 .colorPreview {
-   width: 40px !important;
-   height: 40px !important;
+   width: calc(22px + 1rem) !important;
+   height: calc(22px + 1rem) !important;
    border-radius: 50%;
    cursor: pointer;
    position: relative;
@@ -806,7 +825,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 1rem;
     font-family: 'sf';
     font-weight: 600;
     color: white;
@@ -993,13 +1012,13 @@ hr{
 }
 #iconSearch {
     width: 100%;
-    padding: 12px 22px;
-    border-radius: 24px;
+    padding: 0.7rem 1.365rem;
+    border-radius: 1.5rem;
     border: 0.7px solid #ffffff8a;
     background: #ececec36;
     backdrop-filter: blur(6px) saturate(1.5) brightness(1.1);
     box-shadow: inset 0 0 8px 0 #00000025, 0 0 21px 0 #0000000e;
-    font-size: 17.4px;
+    font-size: 1.08rem;
     font-family: 'sf';
     margin-top: 4px;
     transition: all 400ms ease; 
@@ -1037,10 +1056,7 @@ hr{
     width: 100%;
     box-sizing: border-box;
     display: grid;
-    /* minmax(48px, 1fr) asegura que el icono no mida menos de 48px.
-       auto-fill creará tantas columnas como quepan. 
-    */
-    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(2.62rem, 1fr));
     gap: 12px;
     justify-items: center; /* Centra los iconos en su celda */
 }
@@ -1059,165 +1075,5 @@ hr{
 .iconCategory .categoryTitle {
   margin-bottom: 10px;
   font-weight: 500;
-  font-size: 17px;
+  font-size: 1rem;
 }
-.segmented-control-container {
-    padding: 10px 16px;
-    background: transparent;
-}
-
-.segmented-control {
-    position: relative;
-    display: flex;
-    background: #7676801e;
-    backdrop-filter: blur(12px);
-    border-radius: 26px;
-    padding: 8px;
-    user-select: none;
-}
-
-.segmented-control input {
-    display: none;
-}
-
-.segmented-control label {
-    flex: 1;
-    text-align: center;
-    padding: 6px 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: #000;
-    z-index: 1;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.selection-slider {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: calc(50% - 3px);
-    height: calc(100% - 6px);
-    background: #ffffff;
-    border-radius: 26px;
-    transition: transform 450ms cubic-bezier(.38,.23,.26,.98);
-}
-
-/* Movimiento del slider */
-#view-routines:checked ~ .selection-slider {
-    transform: translateX(100%);
-}
-
-#view-habits:checked ~ label[for="view-habits"],
-#view-routines:checked ~ label[for="view-routines"] {
-    font-weight: 600;
-}
-.routine-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 18px 8px 18px;
-    font-size: 17px;
-    font-weight: 700;
-    color: #000;
-}
-.rt-count {
-    font-size: 14px;
-    color: #8E8E93;
-    font-weight: 400;
-}
-.habitTime {
-    font-size: 12px;
-    color: #8E8E93;
-    margin-top: 2px;
-    font-weight: 500;
-}
-.custom-alert-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.079);
-    display: none; /* Oculto por defecto */
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-
-.custom-alert {
-    width: 270px;
-    background: rgba(255, 255, 255, 0.411);
-    backdrop-filter: blur(15px);
-    border-radius: 26px;
-    border: 1px solid rgba(255, 255, 255, 0.587);
-    text-align: center;
-    overflow: hidden;
-    animation: alertPop 0.2s ease-out;
-}
-
-@keyframes alertPop {
-    from { transform: scale(1.2); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.alert-title { font-weight: 600; padding: 16px 16px 4px; font-size: 17px; }
-.alert-message { font-size: 13px; padding: 0 16px 12px; color: #000; }
-
-.alert-input {
-    width: calc(100% - 32px);
-    margin: 0 16px 16px;
-    padding: 6px 8px;
-    border: 0.5px solid #8E8E93;
-    border-radius: 16px;
-    background: #fff;
-    font-size: 13px;
-    outline: none;
-}
-
-.alert-buttons {
-    display: flex;
-    border-top: 0.5px solid #C6C6C8;
-}
-
-.alert-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: transparent;
-    font-size: 17px;
-    cursor: pointer;
-}
-
-.alert-btn.cancel { color: #007AFF; border-right: 0.5px solid #C6C6C8; }
-.alert-btn.confirm { color: #007AFF; font-weight: 600; }
-
-.alert-btn:active { background: rgba(0,0,0,0.05); }
-.routineCard {
-    background: #fafafa;
-    padding: 18px 26px;
-    height: 120px;
-    border-radius: 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: top;
-    transition: transform 0.2s;
-}
-
-.routineCard:active { transform: scale(0.97); }
-
-.rtTitle { font-size: 18px; font-weight: 500; color: #1c1c1e; }
-.rtStats { font-size: 15.5px; color: #8e8e93; margin-top: 4px; }
-
-.rtProgressRing { position: relative; width: 50px; height: 50px; }
-.circular-chart { width: 50px; height: 50px; }
-.circle-bg { fill: none; stroke: #eee; stroke-width: 3.8; }
-.circle { fill: none; stroke: #007AFF; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
-
-.rtIcon {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 16px; color: #007AFF;
-    font-weight: 600;
-}
-
-.routineCard.perfect .circle { stroke: #34C759; }
-.routineCard.perfect .rtIcon { color: #34C759; }

@@ -1,251 +1,297 @@
-// --- ESTADO GLOBAL Y CARGA DE DATOS ---
-let habits = JSON.parse(localStorage.getItem('habits') || '[]');
-let currentHabitIdx = null;
-let selectedDate = new Date().toISOString().split('T')[0];
-let activeSheet = null;
-let previousSheet = null;
-let zCounter = 1000;
-let ignoreNextClick = false;
-
-function genId() {
-    return 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
-}
-
-// Asegurar IDs y persistencia inicial
-habits.forEach(h => { if (!h.id) h.id = genId(); });
-localStorage.setItem('habits', JSON.stringify(habits));
-
-// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('selectedDate');
-    if (dateInput) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateInput.value = `${yyyy}-${mm}-${dd}`;
-        selectedDate = dateInput.value;
-        dateInput.onchange = (e) => { selectedDate = e.target.value; renderHabits(); };
-    }
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
 
-    // Listener para el buscador de iconos
-    const iconSearch = document.getElementById('iconSearch');
-    if (iconSearch) {
-        iconSearch.addEventListener('input', (e) => initIcons(e.target.value));
-    }
+    // Actualizamos la variable global
+    selectedDate = dateInput.value;
 
-    initIcons();
+    // Renderizamos hábitos para la fecha actual
     renderHabits();
 });
 
-// --- LÓGICA DE SHEETS (MODALES) ---
+const addBtn = document.getElementById('addHabitBtn');
+const sheet = document.querySelector('.sheetContent');
+
+addBtn.addEventListener('click', () => {
+  addBtn.classList.add('clickAnim');
+
+  setTimeout(() => {
+    sheet.classList.add('active'); // abre la sheet después de 400ms
+    addBtn.classList.remove('clickAnim');
+  }, 400); // delay mayor que la animación para que el feedback termine antes
+});
+
+
+function genId(){
+    return 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+let habits = JSON.parse(localStorage.getItem('habits') || '[]');
+habits.forEach(h => { if(!h.id) h.id = genId(); });
+localStorage.setItem('habits', JSON.stringify(habits));
+
+let currentHabitIdx = null;
+let calDate = new Date();
+const dateInput = document.getElementById('selectedDate');
+dateInput.value = new Date().toISOString().split('T')[0];
+let selectedDate = dateInput.value;
+
+let activeSheet = null;
+
+function resetCreateForm() {
+    document.getElementById('hName').value = '';
+    document.getElementById('uSing').value = '';
+    document.getElementById('uPlur').value = '';
+    document.getElementById('hGoal').value = '';
+    document.getElementById('hStep').value = '';
+
+    selectedIcon = '􀓔';
+    selectedColor = '#777';
+    iconTrigger.textContent = selectedIcon;
+    iconTrigger.style.color = selectedColor;
+
+    colorPicker.value = selectedColor;
+    preview.style.background = selectedColor;
+    wrap.classList.remove('active');
+    presetRadios.forEach(r => r.checked = false);
+}
+
+let ignoreNextClick = false;
+let zCounter = 1000;
+
 function openSheet(id) {
-    if (activeSheet === id) return;
     ignoreNextClick = true;
-    const content = document.getElementById(id);
-    if (!content) return;
 
-    if (activeSheet) {
+    if (activeSheet && activeSheet !== id) {
         const old = document.getElementById(activeSheet);
-        old.classList.remove('active');
-        setTimeout(() => { if (activeSheet !== id) old.style.display = 'none'; }, 400);
-    }
-
-    previousSheet = activeSheet;
-    activeSheet = id;
-    zCounter++;
-    content.style.display = 'block';
-    content.style.zIndex = zCounter;
-    requestAnimationFrame(() => { content.classList.add('active'); });
-}
-function closeSheet(id = activeSheet, cb = null) {
-    const content = document.getElementById(id);
-    if (!content || content.classList.contains('closing')) return;
-
-    ignoreNextClick = true;
-    content.classList.remove('active');
-    content.classList.add('closing');
-
-    // IMPORTANTE: Si estamos cerrando la que está activa, 
-    // la marcamos como null de inmediato para que no pise a la siguiente
-    if (id === activeSheet) activeSheet = null; 
-
-    setTimeout(() => {
-        content.style.display = 'none';
-        content.classList.remove('closing');
-        if (cb) cb();
-    }, 400);
-}
-document.addEventListener('click', (e) => {
-    const prompt = document.getElementById('customPrompt');
-    if (prompt && prompt.style.display === 'flex') return;
-    if (ignoreNextClick || !activeSheet) return;
-    const currentSheetEl = document.getElementById(activeSheet);
-    if (!currentSheetEl || currentSheetEl.classList.contains('closing')) return;
-    if (!currentSheetEl.contains(e.target) && !e.target.closest('#addHabitBtn') && !e.target.closest('.botoncito')) {
+        old.style.zIndex = zCounter;
         closeSheet(activeSheet);
     }
-});
-document.addEventListener('click', () => {
-    ignoreNextClick = false;
-}, true);
 
-let selectedIcon = '􀓔';
-let selectedColor = '#0076ff';
+    const content = document.getElementById(id);
+    activeSheet = id;
 
-const colorPicker = document.getElementById('iconColorPicker');
-    const preview = document.getElementById('colorPreview');
-    const iconTrigger = document.getElementById('iconPickerTrigger');
+    zCounter++;
+    content.style.zIndex = zCounter;
+    content.style.display = 'block';
+    requestAnimationFrame(() => content.classList.add('active'));
 
-    if (colorPicker) {
-        colorPicker.addEventListener('input', (e) => {
-            selectedColor = e.target.value;
-            preview.style.background = selectedColor;
-            iconTrigger.style.color = selectedColor;
-            initIcons();
-        });
-    }
-
-    document.querySelectorAll('input[name="presetColor"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            selectedColor = e.target.value;
-            preview.style.background = selectedColor;
-            iconTrigger.style.color = selectedColor;
-            if (colorPicker) colorPicker.value = selectedColor;
-            initIcons();
-        });
-    });
-function initIcons(filter = "") {
-    const grid = document.getElementById('iconGrid');
-    if (!grid || typeof iconData === 'undefined') return;
-    grid.innerHTML = "";
-    const searchLower = filter.toLowerCase();
-
-    for (const [category, icons] of Object.entries(iconData)) {
-        const filteredIcons = icons.filter(icon => icon.name.toLowerCase().includes(searchLower));
-        if (filteredIcons.length > 0) {
-            const catWrap = document.createElement('div');
-            catWrap.className = 'iconCategory';
-            catWrap.innerHTML = `<div class="categoryTitle">${category}</div>`;
-            const subGrid = document.createElement('div');
-            subGrid.className = 'iconGridSub';
-
-            filteredIcons.forEach(icon => {
-                const div = document.createElement('div');
-                div.className = 'iconItem';
-
-                div.textContent = icon.char;
-
-                if (icon.char === selectedIcon) {
-                    div.classList.add('selected');
-                    div.style.color = selectedColor;
-                } else {
-                    div.style.color = '#8e8e93'; // color base
-                }
-
-                div.onclick = () => {
-                    selectedIcon = icon.char;
-                    if (iconTrigger) {
-                        iconTrigger.textContent = selectedIcon;
-                        iconTrigger.style.color = selectedColor;
-                    }
-                    closeSheet('iconPickerSheet', () => {
-                        openSheet('createSheet');
-                    });
-                };
-
-
-                subGrid.appendChild(div);
-            });
-
-            catWrap.appendChild(subGrid);
-            grid.appendChild(catWrap);
-        }
-    }
+    setTimeout(() => ignoreNextClick = false, 0);
 }
 
+document.addEventListener('click', (e) => {
+    if (ignoreNextClick || !activeSheet) return;
+    const sheet = document.getElementById(activeSheet);
+    if (!sheet.contains(e.target)) closeSheet(activeSheet);
+});
+
+function closeSheet(id) {
+    const content = document.getElementById(id);
+
+    content.classList.add('closing');
+    content.classList.remove('active');
+
+    const handler = () => {
+        content.style.display = 'none';
+        content.classList.remove('closing');
+        content.removeEventListener('transitionend', handler);
+        if (activeSheet === id) activeSheet = null;
+    };
+
+    content.addEventListener('transitionend', handler);
+}
+
+// --- ICONOS Y COLORES ---
+const emojiList = ['􀙪','􀠒','􀉛','􀤟','􁂙','􁌋','􀻑','􀟞','􀐙','􀈊','􀟛','􁚮','􁖏','􁓃','􁐡','􀝢','􀩼','􀇁','􀐮','􁔴','􀦉','􀆮','􀓔','􀜎','􂀇','􁖑','􁔨','􁔟','􀐬','􀙌','􀸩','􀥅','􀑈','􁖍','􀋞','􁋭','􀦛','􀈎','􀉼','􀊹','􀆿','􁕍','􀷾','􀍤','􀙈','􀨵','􂂇','􀈒','􁐿','􀉬','􀲯','􁐥','􁌟','􁌝','􀾡','􂏩','􁐆','􁐅','􀵟','􀑊','􀫔','􀑓','􀉉','􀈖','􀍰','􂏱','􀌟','􁂂','􀉀','􀖆','􀎙','􀟽','􀟖','􁞵','􀑫','􀎟','􀫘'];
+let selectedIcon = '􀓔';
+const iconTrigger = document.getElementById('iconPickerTrigger');
+const colorPicker = document.getElementById('iconColorPicker');
+
+const preview = document.getElementById('colorPreview');
+const wrap = document.querySelector('.colorPickerWrap');
+
+preview.style.background = colorPicker.value;
+
+colorPicker.addEventListener('input', e => {
+    preview.style.background = e.target.value;
+    wrap.classList.add('active');
+    selectedColor = e.target.value;
+    iconTrigger.style.color = selectedColor;
+});
+
+const presetRadios = document.querySelectorAll('input[name="presetColor"]');
+let selectedColor = colorPicker.value;
+
+function initIcons() {
+    const grid = document.getElementById('iconGrid');
+    grid.innerHTML = "";
+
+    emojiList.forEach(emoji => {
+        const div = document.createElement('div');
+        div.className = 'iconItem';
+        div.textContent = emoji;
+
+        if (emoji === selectedIcon) {
+            div.classList.add('selected');
+            div.style.color = selectedColor;
+        }
+
+div.onclick = () => {
+    document.querySelectorAll('.iconItem').forEach(i => {
+        i.classList.remove('selected');
+        i.style.color = ''; // resetear color
+    });
+
+    selectedIcon = emoji;
+    div.classList.add('selected');
+    div.style.color = selectedColor; // solo colorea el seleccionado
+};
+
+
+        grid.appendChild(div);
+    });
+}
+document.getElementById('confirmIconBtn').onclick = () => {
+    iconTrigger.textContent = selectedIcon;
+    iconTrigger.style.color = selectedColor;
+    closeSheet('iconPickerSheet');
+    openSheet('createSheet'); // volver al form
+};
+
+colorPicker.addEventListener('input', e => {
+    preview.style.background = e.target.value;
+    wrap.classList.add('active'); // mostrar X del picker
+    selectedColor = e.target.value;
+    iconTrigger.style.color = selectedColor;
+
+    // desmarcar presets
+    presetRadios.forEach(r => r.checked = false);
+});
+presetRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (radio.checked) {
+            selectedColor = radio.value;
+            colorPicker.value = radio.value;
+            iconTrigger.style.color = selectedColor;
+            wrap.classList.remove('active'); 
+        }
+    });
+});
+function getStreak(h) {
+    let streak = 0;
+    let curr = new Date(); // Hoy
+    curr.setHours(0, 0, 0, 0);
+
+    while (true) {
+        // Formato YYYY-MM-DD local
+        let key = curr.getFullYear() + '-' + 
+                  String(curr.getMonth() + 1).padStart(2, '0') + '-' + 
+                  String(curr.getDate()).padStart(2, '0');
+        
+        if (h.history && h.history[key] >= h.goal) {
+            streak++;
+        } else {
+            // Si es hoy y no está completo, la racha sigue viva por ayer
+            let todayStr = new Date().getFullYear() + '-' + 
+                           String(new Date().getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(new Date().getDate()).padStart(2, '0');
+            if (key === todayStr) {
+                // No sumamos pero seguimos buscando
+            } else {
+                break; 
+            }
+        }
+        curr.setDate(curr.getDate() - 1);
+    }
+    return streak;
+}
 function renderHabits(updatedId = null) {
+   
     const container = document.getElementById('habitsContainer');
-    if (!container) return;
-
+    
     const firstPositions = {};
-    [...container.children].forEach(el => { 
-        if (el.dataset.id) firstPositions[el.dataset.id] = el.getBoundingClientRect(); 
-    });
+    [...container.children].forEach(el => firstPositions[el.dataset.id] = el.getBoundingClientRect());
 
-    // Filtro simple sin rutinas
-    const activeHabits = habits.filter(h => {
-        const date = new Date(selectedDate + "T00:00:00");
-        if (h.frequency === 'weekly') return date.getDay() === 1;
-        if (h.frequency === 'monthly') return date.getDate() === 1;
-        return true;
-    });
-
-    const sorted = [...activeHabits].sort((a, b) => {
+    const sorted = [...habits].sort((a, b) => {
         const ca = (a.history[selectedDate] || 0) >= a.goal;
         const cb = (b.history[selectedDate] || 0) >= b.goal;
-        if (ca !== cb) return ca ? 1 : -1;
-        return (a.time || "99:99").localeCompare(b.time || "99:99");
+        return ca === cb ? 0 : ca ? 1 : -1;
     });
 
-    container.innerHTML = sorted.length > 0 
-        ? sorted.map(h => getHabitCardHTML(h, updatedId)).join('')
-        : `<div style="text-align:center; color:#8e8e93; margin-top:40px;">
-            No hay hábitos para hoy
-          </div>`;
+    container.innerHTML = sorted.map(h => {
+        const i = habits.findIndex(x => x.id === h.id);
+        const qty = h.history[selectedDate] || 0;
+        const isComplete = qty >= h.goal;
+        const progress = Math.min(100, (qty / h.goal) * 100);
+// Dentro del map de habits en renderHabits:
+const streak = getStreak(h); // <--- Solo esta línea
+        // Si este es el hábito que actualizamos, empezamos en 0 para que se vea la animación
+        // Si no, mostramos el progreso actual de una vez
+        const startWidth = (h.id === updatedId) ? 0 : progress;
 
-    applyAnimations(container, firstPositions);
-}
-
-function getHabitCardHTML(h, updatedId) {
-    const i = habits.findIndex(x => x.id === h.id);
-    const qty = h.history[selectedDate] || 0;
-    const isComplete = qty >= h.goal;
-    const progress = Math.min(100, (qty / h.goal) * 100);
-    const streak = getStreak(h);
-    const startWidth = (h.id === updatedId) ? 0 : progress;
-
-    return `
-        <div class="habitCard ${isComplete ? 'completed' : ''}" data-id="${h.id}" style="background-color: ${h.iconColor}12" onclick="openView(${i})">
-            <div class="supcard">
+        return `
+            <div class="habitCard ${isComplete ? 'completed' : ''}" data-id="${h.id}" 
+                 style="background-color: ${h.iconColor}12" onclick="openView(${i})">
                 <div class="habitIconCircle" style="color: ${h.iconColor}">${h.icon}</div>
                 <div class="habitInfo">
-                    <div class="details">
-                        <div class="dup">
-                            <div class="habitName">${h.name}</div>
+                     <div class="cont">
+                        <div class="details">
+                            <div class="dup">
+                                <div class="habitName">${h.name}</div>
+                                ${streak > 0 ? `<span class="streak">􀙭 <div class="streaknum">${streak}</div></span>` : ''}
+                            </div>
                         </div>
-                        ${h.time ? `<div class="habitTime">${h.time}</div>` : ''}
-                    </div>
+                     </div>
+                    ${h.goal > 1 ? `
+                    <div class="habitProgressBar">
+                        <div class="habitProgressBarInner" 
+                             data-w="${progress}%" 
+                             style="width: ${startWidth}%; background: ${h.iconColor};">
+                        </div>
+                    </div>` : ''}
+                    ${h.goal > 1 ? `<div class="habitProgressBadge" style="color: ${h.iconColor}">
+                        ${(qty !=  0 && qty != h.goal ) ? `<div class="cantidad">
+                           <div class="hecho">${qty} ${qty !=  1 ? h.uPlur : h.uSing}</div>
+                           <div class="meta">${h.goal} ${h.uPlur}</div>
+                        </div>`:''}
+                     </div>` : ''}
                 </div>
-                
-                ${streak > 0 ? `<span class="streak">􀙭 <div class="streaknum">${streak}</div></span>` : ''}
-            
                 <button class="botoncito" style="background-color: ${isComplete ? h.iconColor + '70' : h.iconColor}"
                         onclick="event.stopPropagation(); ${isComplete ? 'openStreak()' : `updateQty(1, ${i})`}">
                     ${isComplete ? '􀆅' : '􀅼'}
                 </button>
-            </div>
-    
-            
-            ${h.goal > 1 ? `
-            <div class="progress">
-                <div class="habitProgressBar">
-                    <div class="habitProgressBarInner" data-w="${progress}%" style="width: ${startWidth}%; background: ${h.iconColor};">
-                    </div>
-                </div>` : ''}
-                ${h.goal > 1 ? `
-                <div class="habitProgressBadge" style="color: ${h.iconColor}">
-                    ${(qty != 0 && qty != h.goal) ? `
-                    <div class="cantidad">
-                        <div class="hecho">${qty} ${qty != 1 ? h.uPlur : h.uSing}</div>
-                        <div class="meta">${h.goal} ${h.uPlur}</div>
-                    </div>` : ''}
-                </div>` : ''}
-            </div>
-        </div>`;
-}
+            </div>`;
+    }).join('');
 
-// --- CRUD Y VISTAS ---
+    requestAnimationFrame(() => {
+        const bars = container.querySelectorAll('.habitProgressBarInner');
+        bars.forEach(bar => {
+            // Solo disparamos la animación si el ancho actual es diferente al destino (data-w)
+            if (bar.style.width !== bar.dataset.w) {
+                bar.getBoundingClientRect(); 
+                bar.style.width = bar.dataset.w;
+            }
+        });
+
+        [...container.children].forEach(el => {
+            const last = el.getBoundingClientRect();
+            const first = firstPositions[el.dataset.id];
+            if (!first) return;
+            const dy = first.top - last.top;
+            if (dy === 0) return;
+            el.style.transform = `translateY(${dy}px)`;
+            el.style.transition = 'none';
+            requestAnimationFrame(() => { 
+                el.style.transform = ''; 
+                el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'; 
+            });
+        });
+    });
+}
 function openView(i) {
     currentHabitIdx = i;
     const h = habits[i];
@@ -257,24 +303,63 @@ function openView(i) {
     openSheet('viewSheet');
 }
 
-function saveHabit() {
-    const name = document.getElementById('hName').value.trim();
-    const goal = parseInt(document.getElementById('hGoal').value) || 1;
-    if (!name) return alert('Nombre obligatorio');
+function updateQty(dir, idx = null) {
+    const i = (idx !== null) ? idx : currentHabitIdx;
+    if (i === null) return;
+    const h = habits[i];
+    const current = h.history[selectedDate] || 0;
     
+    h.history[selectedDate] = Math.max(0, current + (dir * h.step));
+    
+    if (idx === null) document.getElementById('vQtyManual').value = h.history[selectedDate];
+    
+    localStorage.setItem('habits', JSON.stringify(habits));
+    // Pasamos el ID para que solo este hábito se anime
+    renderHabits(h.id); 
+}
+
+function setComplete() { 
+    const h = habits[currentHabitIdx];
+    // En lugar de 999, ponemos exactamente la meta
+    h.history[selectedDate] = h.goal; 
+    localStorage.setItem('habits', JSON.stringify(habits));
+    renderHabits(h.id); 
+    closeSheet('viewSheet'); 
+}
+
+document.getElementById('vQtyManual').onchange = (e) => {
+    habits[currentHabitIdx].history[selectedDate] = parseInt(e.target.value) || 0;
+    localStorage.setItem('habits', JSON.stringify(habits));
+    renderHabits();
+};
+
+function saveHabit() {
+    const goal = parseInt(document.getElementById('hGoal').value, 10);
+const step = parseInt(document.getElementById('hStep').value, 10);
+
+if (isNaN(goal) || isNaN(step) || goal <= 0 || step <= 0) {
+    alert('Ingresa un número entero mayor a 0');
+    return;
+}
+
+    const name = document.getElementById('hName').value.trim();
+    if (!name) {
+        alert('El nombre es obligatorio');
+        return;
+    }
     const h = {
         id: currentHabitIdx !== null ? habits[currentHabitIdx].id : genId(),
-        name,
+        name: document.getElementById('hName').value,
         uSing: document.getElementById('uSing').value || 'vez',
         uPlur: document.getElementById('uPlur').value || 'veces',
-        goal,
+        goal: parseInt(document.getElementById('hGoal').value) || 1,
         step: parseInt(document.getElementById('hStep').value) || 1,
-        time: document.getElementById('hTime').value || null,
-        frequency: document.getElementById('hFreq').value,
         icon: selectedIcon,
         iconColor: selectedColor,
         history: currentHabitIdx !== null ? habits[currentHabitIdx].history : {}
     };
+
+    if (!h.name) return;
 
     if (currentHabitIdx !== null) habits[currentHabitIdx] = h;
     else habits.push(h);
@@ -282,6 +367,25 @@ function saveHabit() {
     localStorage.setItem('habits', JSON.stringify(habits));
     renderHabits();
     closeSheet('createSheet');
+
+    // ahora sí, aquí va el reset
+    resetCreateForm();
+}
+
+
+function editHabit() {
+    const h = habits[currentHabitIdx];
+    document.getElementById('hName').value = h.name;
+    document.getElementById('uSing').value = h.uSing;
+    document.getElementById('uPlur').value = h.uPlur;
+    document.getElementById('hGoal').value = h.goal;
+    document.getElementById('hStep').value = h.step;
+    selectedIcon = h.icon;
+    selectedColor = h.iconColor;
+    iconTrigger.textContent = h.icon;
+    iconTrigger.style.color = h.iconColor;
+    closeSheet('viewSheet');
+    openSheet('createSheet');
 }
 
 function deleteHabit() {
@@ -292,198 +396,210 @@ function deleteHabit() {
         closeSheet('viewSheet');
     }
 }
+function getWeekOffset(targetDateStr) {
+    let now = new Date();
+    now.setHours(0, 0, 0, 0);
 
-function updateQty(dir, idx = null) {
-    const i = (idx !== null) ? idx : currentHabitIdx;
-    const h = habits[i];
-    h.history[selectedDate] = Math.max(0, (h.history[selectedDate] || 0) + (dir * h.step));
-    localStorage.setItem('habits', JSON.stringify(habits));
-    if (idx === null) document.getElementById('vQtyManual').value = h.history[selectedDate];
-    renderHabits(h.id);
-}
-// --- FUNCIONES PARA VIEW SHEET ---
+    // Lunes de la semana de "hoy"
+    let dayNow = now.getDay();
+    let diffNow = (dayNow === 0 ? -6 : 1) - dayNow;
+    let mondayNow = new Date(now);
+    mondayNow.setDate(now.getDate() + diffNow);
 
-function clearQty() {
-    if (currentHabitIdx === null) return;
-    const h = habits[currentHabitIdx];
-    h.history[selectedDate] = 0; // Ponemos a cero
-    
-    localStorage.setItem('habits', JSON.stringify(habits));
-    document.getElementById('vQtyManual').value = 0; // Actualizamos el input
-    renderHabits(h.id); // Refrescamos la lista del fondo
-}
+    // Lunes de la fecha seleccionada
+    let target = new Date(targetDateStr + "T00:00:00"); // Forzamos hora local
+    let dayTarget = target.getDay();
+    let diffTarget = (dayTarget === 0 ? -6 : 1) - dayTarget;
+    let mondayTarget = new Date(target);
+    mondayTarget.setDate(target.getDate() + diffTarget);
 
-function setComplete() {
-    if (currentHabitIdx === null) return;
-    const h = habits[currentHabitIdx];
-    h.history[selectedDate] = h.goal; // Igualamos a la meta
-    
-    localStorage.setItem('habits', JSON.stringify(habits));
-    document.getElementById('vQtyManual').value = h.goal; // Actualizamos input
-    renderHabits(h.id); // Refrescamos lista
-    
-    // Opcional: Cerrar la hoja al completar
-    // handleCloseHabit(); 
-}
-document.getElementById('vQtyManual').oninput = (e) => {
-    if (currentHabitIdx === null) return;
-    const val = parseInt(e.target.value) || 0;
-    const h = habits[currentHabitIdx];
-    h.history[selectedDate] = Math.max(0, val);
-    localStorage.setItem('habits', JSON.stringify(habits));
-    renderHabits(h.id);
-};
-// --- UTILIDADES ---
-function getStreak(h) {
-    let streak = 0; let curr = new Date(); curr.setHours(0,0,0,0);
-    const todayStr = curr.toISOString().split('T')[0];
-    while (true) {
-        let key = curr.toISOString().split('T')[0];
-        if (h.history[key] >= h.goal) streak++;
-        else if (key === todayStr) { /* racha sigue viva hoy */ }
-        else break;
-        curr.setDate(curr.getDate() - 1);
-    }
-    return streak;
-}
-
-function applyAnimations(container, firstPositions) {
-    requestAnimationFrame(() => {
-        container.querySelectorAll('.habitProgressBarInner').forEach(bar => {
-            bar.style.transition = 'width 0.4s ease';
-            bar.style.width = bar.dataset.w;
-        });
-    });
-}
-// --- ANIMACIONES ---
-function applyAnimations(container, firstPositions) {
-    requestAnimationFrame(() => {
-        container.querySelectorAll('.habitProgressBarInner').forEach(bar => {
-            bar.style.transition = 'width 0.4s ease';
-            bar.style.width = bar.dataset.w;
-        });
-    });
-}
-
-// --- FUNCIONES DE LIMPIEZA Y CIERRE ---
-function resetCreateForm() {
-    currentHabitIdx = null;
-    document.getElementById('hName').value = '';
-    document.getElementById('uSing').value = '';
-    document.getElementById('uPlur').value = '';
-    document.getElementById('hGoal').value = '';
-    document.getElementById('hStep').value = '';
-    document.getElementById('hTime').value = '';
-    
-    selectedIcon = '􀓔';
-    selectedColor = '#0076ff';
-    if (iconTrigger) {
-        iconTrigger.textContent = selectedIcon;
-        iconTrigger.style.color = selectedColor;
-    }
-    if (preview) preview.style.background = selectedColor;
-}
-
-function handleCloseHabit() {
-    closeSheet(activeSheet);
-}
-
-// --- EVENT LISTENERS (LO QUE FALTABA) ---
-
-// Botón principal de agregar (+)
-const addBtn = document.getElementById('addHabitBtn');
-if (addBtn) {
-    addBtn.onclick = () => {
-        resetCreateForm();
-        openSheet('createSheet');
-    };
-}
-
-// Trigger del selector de iconos
-if (iconTrigger) {
-    iconTrigger.onclick = () => openSheet('iconPickerSheet');
-}
-function backToCreate() {
-    if (previousSheet) {
-        // Al abrir la anterior, openSheet automáticamente cierra la actual
-        // así ambas animaciones ocurren en paralelo.
-        openSheet(previousSheet);
-    } else {
-        // Si por algún error no hay previa, solo cerramos la de iconos
-        closeSheet('iconPickerSheet');
-    }
-}
-
-document.getElementById('confirmIconBtn').onclick = () => {
-    // 1. Guardar el icono seleccionado (suponiendo que guardas la clase o el texto)
-    const activeIcon = document.querySelector('.icon-item.selected');
-    if (activeIcon) {
-        selectedIcon = activeIcon.innerText;
-        // 2. Actualizar el trigger en el formulario de creación
-        document.getElementById('iconPickerTrigger').innerText = selectedIcon;
-    }
-    
-    // 3. El flujo de cierre/apertura
-    closeSheet('iconPickerSheet');
-    openSheet('createSheet'); 
-};
-
-// Editar desde la vista de detalle
-function editHabit() {
-    const h = habits[currentHabitIdx];
-    document.getElementById('hName').value = h.name;
-    document.getElementById('uSing').value = h.uSing;
-    document.getElementById('uPlur').value = h.uPlur;
-    document.getElementById('hGoal').value = h.goal;
-    document.getElementById('hStep').value = h.step;
-    document.getElementById('hTime').value = h.time || '';
-    
-    selectedIcon = h.icon;
-    selectedColor = h.iconColor;
-    iconTrigger.textContent = h.icon;
-    iconTrigger.style.color = h.iconColor;
-    
-    closeSheet('viewSheet', () => {
-        openSheet('createSheet');
-    });
+    const msInWeek = 1000 * 60 * 60 * 24 * 7;
+    return Math.round((mondayTarget - mondayNow) / msInWeek);
 }
 function openStreak() {
     const h = habits[currentHabitIdx];
-    if (!h) return;
-
+    
+    // 1. Calcular racha con la función unificada
     const racha = getStreak(h);
     
-    // Actualizamos números y texto
-    const streakValueEl = document.getElementById('streakValue');
-    const streakTextEl = document.getElementById('streakText');
-    const fireEl = document.querySelector('.streakBadge .fire');
-
-    streakValueEl.textContent = racha;
-    streakTextEl.textContent = racha === 1 ? 'Día de racha' : 'Días de racha';
-
-    // RESET de estilos para evitar el tachado accidental
-    streakValueEl.style.textDecoration = "none";
-    streakTextEl.style.textDecoration = "none";
-
-    // Lógica del icono de fuego
-    if (fireEl) {
-        if (racha === 0) {
-            fireEl.style.filter = "grayscale(100%)";
-            fireEl.style.opacity = "0.5";
-        } else {
-            fireEl.style.filter = "grayscale(0%)";
-            fireEl.style.opacity = "1";
-            fireEl.style.color = h.iconColor; // Que brille con su color
-        }
-    }
-
-    // El resto de la racha (Calendario y Gráfica)
-    // Asumiendo que weekOffset y calDate están definidos globalmente
-    weekOffset = 0; 
-    calDate = new Date(); 
+    // 2. Actualizar el UI de la racha (el badge que creamos)
+    document.getElementById('streakValue').textContent = racha;
+    document.getElementById('streakText').textContent = racha === 1 ? 'Día de racha' : 'Días de racha';
     
-    if (typeof renderCalendar === 'function') renderCalendar();
-    if (typeof updateChart === 'function') updateChart();
+const streakValue = document.getElementById("streakValue");
+const fire = document.querySelector(".fire");
 
+// Aplicar grayscale si racha = 0
+if (racha === 0) {
+    fire.style.filter = "grayscale(100%)";
+    fire.style.opacity = "0.5";
+} else {
+    fire.style.filter = "grayscale(0%)";
+    fire.style.opacity = "1";
+}
+
+    // 3. El resto de tu lógica de calendario y gráficas
+    weekOffset = getWeekOffset(selectedDate); 
+    calDate = new Date(selectedDate);
+    renderCalendar();
+    updateChart();
     openSheet('streakSheet');
 }
+function renderCalendar() {
+    const h = habits[currentHabitIdx];
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    const month = calDate.getMonth(), year = calDate.getFullYear();
+    document.getElementById('calTitle').textContent = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(calDate);
+    // 1. Cambiamos el orden de las etiquetas
+    const diasLabels = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+    diasLabels.forEach(d => {
+        const div = document.createElement('div'); 
+        div.style.color='#8E8E93'; 
+        div.textContent = d; 
+        grid.appendChild(div);
+    });
+
+    const firstDayRaw = new Date(year, month, 1).getDay();
+    // 2. Ajuste para que Lunes sea 0 y Domingo sea 6
+    const firstDay = (firstDayRaw === 0) ? 6 : firstDayRaw - 1;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+    for(let d=1; d<=daysInMonth; d++) {
+        const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const qty = h.history[key] || 0;
+        const goal = h.goal;
+        const progress = Math.min(1, qty / goal);
+        
+        // El perímetro de un círculo con radio 18 es ~113
+        const radius = 18;
+        const circ = 2 * Math.PI * radius;
+        const offset = circ - (progress * circ);
+
+        const cell = document.createElement('div');
+        cell.className = 'dayCell';
+        
+        // Insertamos el SVG del Ring
+        cell.innerHTML = `
+            <svg class="ring" viewBox="0 0 44 44">
+                <circle class="ring-bg" cx="22" cy="22" r="${radius}"></circle>
+                <circle class="ring-fg" cx="22" cy="22" r="${radius}" 
+                    style="stroke-dasharray: ${circ}; stroke-dashoffset: ${offset}; color: ${h.iconColor}; opacity: ${qty > 0 ? 1 : 0}">
+                </circle>
+            </svg>
+            <span class="dayNum">${d}</span>
+        `;
+
+        // Si está completado, podemos resaltar el número o el fondo opcionalmente
+        if(qty >= goal) {
+            cell.querySelector('.dayNum').style.color = h.iconColor;
+            cell.querySelector('.dayNum').style.fontWeight = '700';
+        }
+
+        grid.appendChild(cell);
+    }
+}
+function changeMonth(dir) { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); }
+// Variable global para controlar qué semana vemos (0 = actual, -1 = anterior, etc.)
+let weekOffset = 0;
+function updateChart() {
+    const h = habits[currentHabitIdx];
+    if (!h) return;
+
+    const bars = document.querySelectorAll('.day .fill');
+    const daysContainer = document.querySelectorAll('.day');
+    const weekLabel = document.getElementById('weekLabel');
+    
+    let now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    let dayOfWeek = now.getDay(); 
+    let diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    
+    let startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() + diffToMonday + (weekOffset * 7));
+
+    // --- NUEVA LÓGICA DE ESCALA ---
+    // Calculamos el valor máximo de la semana para que las barras se ajusten
+    let weeklyValues = [];
+    for (let i = 0; i < 7; i++) {
+        let d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        let key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        weeklyValues.push(h.history[key] || 0);
+    }
+    
+    // El máximo será el valor más alto registrado o la meta (lo que sea mayor)
+    let maxInChart = Math.max(...weeklyValues, h.goal);
+
+    // Etiqueta de la semana
+    let endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    weekLabel.textContent = `${startOfWeek.getDate()} ${startOfWeek.toLocaleString('es-ES', {month:'short'})} - ${endOfWeek.getDate()} ${endOfWeek.toLocaleString('es-ES', {month:'short'})}`;
+
+    for (let i = 0; i < 7; i++) {
+        let d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        let key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        
+        let qty = h.history[key] || 0;
+        let isToday = d.toDateString() === new Date().toDateString();
+        let isComplete = qty >= h.goal;
+
+        // Calculamos la altura relativa al máximo de la semana
+        let heightPercentage = (qty / maxInChart) * 100;
+
+        if (bars[i]) {
+            // 1. Ajuste de altura y color
+            bars[i].style.height = `${heightPercentage}%`;
+            bars[i].style.backgroundColor = isToday ? h.iconColor : "#D1D1D6"; // Color solo si es hoy
+            
+            // 2. Gestionar el Check (si qty >= goal)
+            // Eliminamos check anterior si existe
+            const existingCheck = daysContainer[i].querySelector('.check-mark');
+            if (existingCheck) existingCheck.remove();
+
+            if (isComplete) {
+                const check = document.createElement('div');
+                check.className = 'check-mark';
+                check.textContent = '􀁣'; // Icono de check (SF Pro)
+                check.style.cssText = `color: ${h.iconColor};`;
+                daysContainer[i].appendChild(check);
+            }
+
+            // 3. Estilo del texto inferior
+            const dayLabel = daysContainer[i].querySelector('.dayLabel');
+            dayLabel.style.color = isToday ? h.iconColor : "#8E8E93";
+            dayLabel.style.fontWeight = isToday ? 'bold' : '500';
+        } 
+    }
+}
+
+document.getElementById('prevWeek').onclick = () => {
+    weekOffset--;
+    updateChart();
+};
+
+document.getElementById('nextWeek').onclick = () => {
+    weekOffset++;
+    updateChart();
+};
+
+updateChart();
+
+function clearQty() { habits[currentHabitIdx].history[selectedDate] = 0; localStorage.setItem('habits', JSON.stringify(habits)); renderHabits(); closeSheet('viewSheet'); }
+
+document.getElementById('addHabitBtn').onclick = () => { 
+    currentHabitIdx = null; 
+    resetCreateForm();
+    openSheet('createSheet'); 
+};
+
+
+document.getElementById('iconPickerTrigger').onclick = () => openSheet('iconPickerSheet');
+dateInput.onchange = (e) => { selectedDate = e.target.value; renderHabits(); };
+
+initIcons();
+renderHabits();
